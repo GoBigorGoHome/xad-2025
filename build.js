@@ -105,7 +105,7 @@ folders.forEach(folder => {
     });
   }
 
-  manifest.push({ title: displayTitle, date: updatedDate, path: `/${encodeURIComponent(m.folder)}/` });
+  manifest.push({ title: displayTitle, date: updatedDate, path: `/${encodeURIComponent(folder)}/` });
 });
 
 const listItems = manifest
