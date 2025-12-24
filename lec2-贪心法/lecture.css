@@ -1,0 +1,115 @@
+/* @theme lecture */
+@import "default";
+
+section {
+    font-family: "Source Han Sans SC", sans-serif;
+    display: flex; /* required since Marp core v4.0.0, see https://github.com/marp-team/marp-core/releases/tag/v4.0.0 */
+}
+
+strong {
+    font-weight: var(--base-text-weight-bold, 700);
+}
+
+.columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.col64 {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 4fr);
+    gap: 1rem;
+}
+
+.col73 {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 1rem;
+}
+
+.col82 {
+    display: grid;
+    grid-template-columns: minmax(0, 8fr) minmax(0, 2fr);
+    gap: 1rem;
+}
+
+.col46 {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+    gap: 1rem;
+}
+
+.col37 {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+    gap: 1rem;
+}
+
+.col28 {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 8fr);
+    gap: 1rem;
+}
+
+.col19 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 9fr);
+    gap: 1rem;
+}
+
+.col118 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 8fr);
+    gap: 1rem;
+}
+
+.col226 {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) minmax(0, 6fr);
+    gap: 1rem;
+}
+
+
+.col217 {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 7fr);
+    gap: 1rem;
+}
+
+
+.columns3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.hidden {
+    display: none;
+}
+
+figure {
+    display: block;
+    margin: 0 auto;
+}
+
+div.thm {
+    align: justify;
+    background-color: #16a085;
+    border-radius: 20px;
+    padding: 10px 20px 10px 20px;
+    box-shadow: 0px 1px 5px #999;
+}
+
+img {
+    vertical-align: middle;
+}
+
+/* 电子表数字 */
+.digit {
+    font-family: "E1234", "Source Han Sans SC";
+}
+
+.alert {
+    color: red;
+}

@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "node build.js",
+    "preview": "wrangler pages dev dist"
+  },
+  "devDependencies": {
+    "@marp-team/marp-cli": "^4.2.3",
+    "wrangler": "^4.56.0"
+  }
+}

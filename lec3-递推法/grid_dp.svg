@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="42" height="34" viewBox="0 0 42 34">
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 144 752 L 184 752 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 144 752 L 144 720 L 184 720 L 184 752 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 144 744 L 184 744 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 144 736 L 184 736 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 144 728 L 184 728 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 144 720 L 184 720 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 152 752 L 152 720 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 160 720 L 160 752 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 168 752 L 168 720 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(74.5%, 74.5%, 74.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 176 720 L 176 752 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="2" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(100%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 144 752 L 144 728 L 176 728 L 176 752 Z M 144 752 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="1.2" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(0%, 0%, 100%)" stroke-opacity="1" stroke-miterlimit="10" d="M 144 752 L 144 736 L 176 736 L 176 752 Z M 144 752 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.4" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 164 736 Z M 164 736 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+<path fill="none" stroke-width="0.8" stroke-linecap="butt" stroke-linejoin="round" stroke="rgb(100%, 64.7%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 144 752 L 144 728 L 168 728 L 168 752 Z M 144 752 " transform="matrix(1, 0, 0, -1, -143, 753)"/>
+</svg>
