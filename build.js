@@ -8,6 +8,17 @@ const projectsDir = __dirname;
 if (fs.existsSync(distDir)) fs.rmSync(distDir, { recursive: true });
 fs.mkdirSync(distDir);
 
+// Helper: Get last commit date for the slides.md file
+function getLastUpdated(folder, fileName) {
+  try {
+    // Gets the ISO date of the last commit for this specific file
+    const dateStr = execSync(`git log -1 --format=%cd --date=format:'%Y-%m-%d' -- "${path.join(folder, fileName)}"`, { encoding: 'utf-8' });
+    return dateStr.trim() || new Date().toISOString().split('T')[0]; // Fallback to today
+  } catch (e) {
+    return new Date().toISOString().split('T')[0];
+  }
+}
+
 // 1. Get folders with slides.md
 const folders = fs.readdirSync(projectsDir).filter(file => {
   const fullPath = path.join(projectsDir, file);
@@ -54,7 +65,8 @@ folders.forEach(folder => {
   
   // 2. Extract Title
   const titleMatch = content.match(/^title:\s*["']?(.*?)["']?$/m);
-  const displayTitle = titleMatch ? titleMatch[1] : folder;
+  const displayTitle = titleMatch ? titleMatch[1] : folder.replace(/-/g, ' ');
+  const updatedDate = getLastUpdated(projectPath, 'slides.md');
 
   console.log(`\n🚀 Building ${isMarp ? '[Marp]' : '[Slidev]'}: ${displayTitle}`);
   fs.mkdirSync(distSubDir, { recursive: true });
@@ -93,7 +105,7 @@ folders.forEach(folder => {
     });
   }
 
-  manifest.push({ title: displayTitle, path: `./${folder}/` });
+  manifest.push({ title: displayTitle, date: updatedDate, path: `/${encodeURIComponent(m.folder)}/` });
 });
 
 const listItems = manifest
