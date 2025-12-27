@@ -426,8 +426,7 @@ img {
 
 </div>
 
-![](./def-z-box.png){width=60%}
-
+![center](./def-z-box.png){width=60%}
 <div class=caption>
 
 $Z[7] = 7$，$[7,13]$ 是一个 Z-box。
@@ -605,7 +604,7 @@ $
 
 ---
 
-我们把上面讲的用 border 数组进行字符串匹配的算法称为 **KMP 算法**。
+上面讲的用 border 数组进行字符串匹配的算法，我们称之为 **KMP 算法**。
 
 <div class=remark v-click>
 
@@ -741,11 +740,243 @@ vector<int> z_search(string p, string t, vector<int> z) {
 
 ---
 
+
+
+<div class=definition>
+
+设 $S = a_1 a_2 \dots a_n$ 是一个长为 $n$ 的字符串。  
+我们把 $S$ 倒转过来得到的字符串记作 $\rev{S}$，也就是 $\rev{S} := a_n \dots a_2 a_1$.
+
+如果 $S = \rev{S}$，就称 $S$ 是**回文串**（palindrome）。
+
+特别的，空串是回文串。
+</div>
+
+- 例：`noon`，`madam`，`level`，`radar`，`racecar` 是回文串。`apple`,`aab`，`qop` 不是回文串。
+
+<!-- 空串应不应该算作回文串？
+eertree 论文里不把空串当作回文串是出于什么考虑？
+ -->
+
+<!-- > palindromes are one of the most important repetitive structures in strings. -->
+
+---
+
+<div class=question>
+
+给你一个长为 $n$ 的字符串 $x$。求 $x$ 有多少个子串是回文串。  
+也就是有多少对整数 $l, r$ 满足：$1 \le l \le r \le n$ 且 $x[l..r]$ 是回文串。
+</div>
+
+- 例：`aaa` 有 6 个回文子串。`banana` 有 10 个回文子串。
+
+<div class=topic topic=暴力法 v-click>
+
+枚举 $l, r$，判断 $x[l..r]$ 是不是回文串。时间 $O(n^3)$。
+
+</div>
+
+---
+
+
 # 回文子串
 
+<div class=definition>
+
+设 $x$ 是一个长为 $n$ 的字符串。若子串 $x[l..r]$ 是回文串，则称之为 $x$ 的**回文子串**。
+
+回文子串 $x[l..r]$ 的**中心**是 $(l+r)/2$，**半径**是 $\lfloor (r-l+1)/2 \rfloor$。
+</div>
+
+- 例：`a` 的半径是 $0$，`aa` 的半径是 $1$，`aaa` 的半径是 $1$，`noon` 的半径是 $2$，`madam` 的半径是 $2$。 
+
+<div class=remark>
+
+有些资料里，回文子串的半径定义是 $\lceil (r-l+1)/2 \rceil$。
+
+</div>
+
+---
+
+# 回文中心、回文半径
+
+<div class=definition>
+
+设 $x$ 是一个长为 $n$ 的字符串。我们把 $x$ 里每个字符的位置称为一个**奇回文中心**，把 $x$ 里相邻两个字符之间的位置称为一个**偶回文中心**，把奇偶回文中心统称为**回文中心**。  
+
+对于 $x$ 的一个回文中心，我们把以它为中心的最长回文子串的半径称为它的**回文半径**。
+</div>
+
+
+![center](./回文中心.svg){width=200}
+<div class=caption> 黑色的点是奇回文中心，橙色的点是偶回文中心。</div>
+
+
+
+$$
+\begin{matrix}
+回文中心 & \texttt{a} & & \texttt{b} & & \texttt{b} & & \texttt{a} & & \texttt{b} & & \texttt{a} & &\texttt{b} & & \texttt{a} \\
+回文半径 & 0 & 0 & 0 & 2 & 0 & 0 & 1 & 0 & 2 & 0 & 2 & 0 & 1 & 0 & 0
+\end{matrix}
+$$
 
 
 ---
+
+<div class=remark>
+
+- 字符串 $x$ 的一个回文中心是 $x$ 里的一个位置。
+- 长为 $n$ 的字符串有 $2n - 1$ 个回文中心。
+- 虽然 $x$ 最多有 $O(n^2)$ 个回文子串，但是回文子串的中心只有 $O(n)$ 个。
+- 知道了每个回文中心的回文半径，就知道了 $x$ 的全部回文子串。
+</div>
+
+<div class=definition v-click>
+
+设 $x$ 是一个长为 $n$ 的字符串，定义数组 $\rad = \rad[1], \dots, \rad[2n-1]$
+$$
+\rad[i] := \text{回文中心 $(i+1)/2$ 的回文半径}. 
+$$
+我们把数组 $\rad$ 称为字符串 $x$ 的**回文半径数组**。
+</div>
+
+
+---
+
+
+<div class=topic topic=中心延伸法>
+
+枚举每个回文中心，求它的回文半径。时间 $O(n^2)$。
+![](./中心延伸.png)
+
+</div>
+
+---
+
+# 中心延伸法的程序实现
+
+统一处理奇、偶回文中心
+
+```cpp
+vector<int> palindrome_radius(string s) {
+  int n = s.size();
+  vector<int> rad(2 * n - 1);
+  for (int i = 0; i < 2 * n - 1; i++) {
+    int p = i / 2;
+    int q = (i + 1) / 2;
+    int k = 0;
+    while (0 <= q - k - 1 && p + k + 1 < n && s[q - k - 1] == s[p + k + 1]) {
+      k++;
+    }
+    rad[i] = k;
+  }
+  return rad;
+}
+```
+
+<div class=remark>
+
+- 当 `i` 是偶数时，`p == q`。当 `i` 是奇数时 `p + 1 == q`。
+- 从点 `p` 往右延伸，从点 `q` 往左延伸。
+</div>
+
+---
+
+<div class=topic-box>
+
+我们寻求更快的计算每个中心的回文半径的方法。
+
+</div>
+
+---
+
+# Manacher 算法
+
+在 $O(n)$ 时间计算字符串的回文半径数组
+
+<div class=topic-box>
+
+- 输入：一个长为 $n$ 的字符串 $x$。
+- 输出：一个长为 $2n - 1$ 的数列，即 $x$ 的回文半径数组。
+</div>
+
+
+- 从左到右计算每个回文中心的回文半径。
+- 维护两个下标 $l$ 和 $r$ 表示已经找到的右端点最大的回文子串的左、右端点。
+- 在用中心延伸法求当前中心点的回文半径时，利用 (i) $x[l..r]$ 是回文串和 (ii) 已经求出的回文半径，不检查已知是回文子串的部分。
+![](./manacher.svg){width=900}  
+此时我们知道 $\rad[12] \ge 2$。
+
+
+
+<!-- - Manacher 算法的特点：**在线**。在算法开始时不需要知道整个的字符串 $x$。 -->
+
+---
+
+# Manacher 算法的程序实现
+
+下标从 0 开始
+
+
+![](./manacher_2.svg){width=900}
+
+- $l + r$ 就是回文子串 $x[l..r]$ 的中心（的编号），也就是上图中的对称轴。
+- 当前回文中心点 $i$ 关于对称轴 $l+r$ 的对称点是 $2(l + r) - i$。
+
+---
+
+
+```cpp {all|8}
+vector<int> manacher(string s) {
+  int n = s.size();
+  vector<int> rad(2 * n - 1);
+  int l = 0, r = 0; // l r 是目前找到的右端点最大的回文子串的左右端点
+  for (int i = 0; i < 2 * n - 1; i++) {
+    int p = i / 2;
+    int q = (i + 1) / 2; 
+    int k = (r <= p ? 0 : min(r - p, rad[2 * (l + r) - i]));
+    while (0 <= q - k - 1 && p + k + 1 < n && s[q - k - 1] == s[p + k + 1])
+      k++;
+    if (p + k > r) { 
+      r = p + k;
+      l = q - k;
+    }
+    rad[i] = k;
+  }
+}
+```
+
+<div v-click>
+
+第 8 行，`r <= p` 不能写成 `r < p`。因为当 `r == p` 时 `2 * (l + r)` 可能小于 `i`。例如
+![center](./manacher_3.svg){width=500}
+</div>
+
+---
+
+# 课堂练习
+
+洛谷 [P3805](https://www.luogu.com.cn/problem/P3805)
+
+<div v-click>
+
+
+
+```cpp
+int main() {
+  string s;
+  cin >> s;
+  vector<int> rad = manacher(s);
+  int ans = 0;
+  for (int i = 0; i < s.size(); i++)
+    ans = max(ans, 2 * rad[i] + 1 - (i & 1));
+  cout << ans << '\n';
+}
+```
+</div>
+
+---
+
 
 # 周期
 

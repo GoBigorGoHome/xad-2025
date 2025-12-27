@@ -6,6 +6,8 @@ export default defineKatexSetup(() => {
         '\\border': '\\mathrm{border}',
         '\\pref': '\\mathrm{pref}',
         '\\lcp': '\\mathrm{lcp}',
+        '\\rev' : '\\overleftarrow{#1}',
+        '\\rad' : '\\operatorname{rad}',
     },
   }
 })

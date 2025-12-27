@@ -163,7 +163,7 @@
 }
 
 .remark::before {
-  content: "注记";
+  content: "注意";
   position: absolute;
   top: 0;
   left: 0;
@@ -193,10 +193,36 @@
   border-radius: 8px;
 }
 
+.topic {
+  border: 2px solid #ff9800;
+  background-color: #fff3e0;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.topic::before {
+  content: attr(topic);
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 2px 8px;
+  background-color: #ff9800;
+  font-weight: 0.8em;
+  color: white;
+  border-radius: 6px 0 8px 0;
+}
+
 strong {
   color: #c2185b;  /* 濃いマゼンタ色 */
 }
 
 .caption {
-  @apply text-center text-sm text-gray-500 mt-2;
+  @apply text-center text-sm text-gray-500 mt-0;
 }
+
+  img[alt~="center"] {
+    display: block;
+    margin: 0 auto;
+  }
