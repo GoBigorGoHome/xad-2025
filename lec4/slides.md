@@ -947,13 +947,14 @@ vector<int> manacher(string s) {
     }
     rad[i] = k;
   }
+  return rad;
 }
 ```
 
-<div v-click>
+<div v-after>
 
 第 8 行，`r <= p` 不能写成 `r < p`。因为当 `r == p` 时 `2 * (l + r)` 可能小于 `i`。例如
-![center](./manacher_3.svg){width=500}
+![center](./manacher_3.svg){width=450}
 </div>
 
 ---
