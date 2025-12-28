@@ -683,7 +683,7 @@ vector<int> kmp_search(string t, string p, vector<int> border) {
 1. 算出模式串 $P$ 的 Z 数组。
 2. 计算一个数组 $b = b[1], \dots, b[n]$。
     - $b[i]$ 的定义：$T[i..n]$ 和 $P$ 的最长公共前缀的长度。
-    - $P$ 在 $T$ 的位置 $j$ 出现 $\iff$ $a[j] = m$。 
+    - $P$ 在 $T$ 的位置 $j$ 出现 $\iff$ $b[j] = m$。 
 
 <div class=example v-click>
 
@@ -835,7 +835,7 @@ $$
 
 设 $x$ 是一个长为 $n$ 的字符串，定义数组 $\rad = \rad[1], \dots, \rad[2n-1]$
 $$
-\rad[i] := \text{回文中心 $(i+1)/2$ 的回文半径}. 
+\rad[i] := \text{$x$ 的回文中心 $(i+1)/2$ 的回文半径}. 
 $$
 我们把数组 $\rad$ 称为字符串 $x$ 的**回文半径数组**。
 </div>
@@ -843,11 +843,15 @@ $$
 
 ---
 
+# 计算回文半径数组
 
 <div class=topic topic=中心延伸法>
 
-枚举每个回文中心，求它的回文半径。时间 $O(n^2)$。
-![](./中心延伸.png)
+枚举每个回文中心，依次比较中心点左右第一个字符，第二个字符，……，直到遇到一对不相同的字符。
+
+![center](./中心延伸.png)
+
+时间 $O(n^2)$。
 
 </div>
 
@@ -954,13 +958,16 @@ vector<int> manacher(string s) {
 
 ---
 
+# Manancher 算法的时间复杂度
+
+
+---
+
 # 课堂练习
 
 洛谷 [P3805](https://www.luogu.com.cn/problem/P3805)
 
 <div v-click>
-
-
 
 ```cpp
 int main() {
@@ -977,9 +984,36 @@ int main() {
 
 ---
 
+# 题目研究
+
+Palindrome Construction [abc349_g](https://atcoder.jp/contests/abc349/tasks/abc349_g)
+
+给你一个长为 $N$ 的非负整数序列 $A=(A_1, A_2,\dots, A_N)$。判断是否存在长为 $N$ 的正整数列 $S=(S_1,S_2, \dots, S_N)$ 满足下列条件，若存在，找出字典序最小的那个。
+- 对每个 $i = 1, 2, \dots, N$，下列条件成立：
+  - 序列 $(S_{i-A_i}, S_{i-A_i+1}, \dots, S_{i+A_i})$ 是回文列。
+  - 如果 $2 \le i - A_i$ 且 $i + A_i \le N - 1$，那么序列 $(S_{i-A_i-1}, S_{i-A_i}, \dots, S_{i+A_i+1})$ 不是回文列。
+
+#### 限制
+
+- $1 \le N \le 2\times 10^5$
+- $0 \le A_i \le \min(i - 1, N - i)$
+
+<div class=topic-box v-click>
+
+告诉你一个序列每个奇回文中心的回文半径，构造一个这样的序列。
+
+</div>
+
+---
 
 # 周期
 
 
 
 ---
+
+# 周期引理
+
+
+---
+
