@@ -75,7 +75,7 @@ transition: fade-out
 
 ---
 
-# $\operatorname{Border}(x)$
+# Border(x)
 
 <div class="definition">
 
@@ -959,14 +959,156 @@ vector<int> manacher(string s) {
 
 ---
 
-# Manancher 算法的时间复杂度
+# Manancher 算法的时间复杂度是 O(n)
+
+```cpp
+vector<int> manacher(string s) {
+  int n = s.size();
+  vector<int> rad(2 * n - 1);
+  int l = 0, r = 0; // l r 是目前找到的右端点最大的回文子串的左右端点
+  for (int i = 0; i < 2 * n - 1; i++) {
+    int p = i / 2;
+    int q = (i + 1) / 2; 
+    int k = (r <= p ? 0 : min(r - p, rad[2 * (l + r) - i]));
+    while (0 <= q - k - 1 && p + k + 1 < n && s[q - k - 1] == s[p + k + 1])
+      k++;
+    if (p + k > r) { 
+      r = p + k;
+      l = q - k;
+    }
+    rad[i] = k;
+  }
+  return rad;
+}
+```
+
+- `r` 递增。
+- 第 10 行 `k++;` 执行多少次，`r` 就增大多少。不过 `k++;` 不是 `r` 增大的唯一途径。
+- 所以 `k++;` 执行的次数不超过 `r` 的增量，而 `r` 不超过 $n-1$。
+
+---
+
+如果我们只需要求长度是奇数的回文子串，那么代码可以简化。
+
+```cpp
+vector<int> manacher_odd(string s) {
+  int n = s.size();
+  vector<int> rad(n); //奇回文中心有 n 个
+  int l = 0, r = 0; // l r 是目前找到的右端点最大的奇回文子串的左右端点
+  for (int i = 0; i < n; i++) {
+    int k = (r <= i ? 0 : min(r - i, rad[(l + r) - i]));
+    while (0 <= i - k - 1 && i + k + 1 < n && s[i - k - 1] == s[i + k + 1])
+      k++;
+    if (i + k > r) { 
+      r = i + k;
+      l = i - k;
+    }
+    rad[i] = k;
+  }
+  return rad;
+}
+```
+
+类似地，如果我们只需要求长度是偶数的回文子串，代码也可以简化。
+
+---
+
+
+# 利用回文半径数组
+
+字符串 $s$ 的回文半径数组包含了 $s$ 的所有回文子串的位置信息。
+
+有了回文半径数组，我们可以
+- 在 $O(1)$ 时间判断子串 $s[l..r]$ 是不是回文串。  
+按照我们的写法，条件可以表达为 `2 * rad[l+r] >= r - l` 或 `(l + r) / 2 + rad[l + r] >= r`。
+- 算出 $s$ 的每个前缀的最长回文后缀的长度。（结尾在 $s[i]$ 的最长回文子串的长度。）
+- 算出 $s$ 的每个后缀的最长回文前缀的长度。（开头在 $s[i]$ 的最长回文子串的长度。）
+- 列举出 $s$ 的所有回文子串。
+
+---
+
+<div class="question">
+
+已知字符串 $s$ 的回文半径数组，求 $s$ 的每个前缀的最长回文后缀的长度。
+
+</div>
+
+<div class=example>
+
+$s = \texttt{abbababa}$。
+$$
+\begin{array}{l}
+前缀 & 最长回文后缀的长度 \\
+\texttt{a} & 1 \\
+\texttt{ab} & 1 \\
+\texttt{abb} & 2 \\
+\texttt{abba} & 4 \\
+\texttt{abbab} & 3 \\ 
+\texttt{abbaba} & 3 \\
+\texttt{abbabab} & 5 \\
+\texttt{abbababa} & 5
+\end{array}
+$$
+
+</div>
+
+---
+
+要知道 $s[1..i]$ 的最长回文后缀的长度，只要找出最小的回文中心 $c$，它满足：$c \le i$ 且以 $c$ 为中心的最长回文子串的右端点 $\ge i$.
+
+```cpp
+vector<int> rad = manacher(s);
+vector<int> palindrome_suffix(n);
+for (int i = 0, j = 0; i < n; i++) { // j 是回文中心
+  while (j / 2 + rad[j] < i) {
+    j++;
+  }
+  palindrome_suffix[i] = i - (j - i) + 1; // (j - i) 是左端点
+}
+```
+
+类似地，我们也可以算出每个后缀的最长回文前缀的长度
+```cpp
+vector<int> palindrome_prefix(n);
+for (int i = n - 1, j = 2 * n - 2; i >= 0; i--) {
+  while ((j + 1) / 2 - rad[j] > i) {
+    j--;
+  }
+  palindrome_prefix[i] = (j - i) - i + 1; // (j - i) 是右端点
+}
+```
+
+这里可以看出回文子串的**对称性**。
+
+---
+
+<div class=lemma>
+
+设 $x$ 是一个长为 $n$ 的字符串，$p$ 是 $x$ 的一个回文子串。设 $p$ 在 $x$ 里首次出现是在 $x[l..r]$，那么 $x[l..r]$ 是 $x[1..r]$ 的最长回文后缀。
+</div>
+
+证明：假设 $x[l..r]$ 不是 $x[1..r]$ 的最长回文子串。也就是说存在 $l'$ 满足 $x[l'..r]$ 也是回文子串且 $l' < l$。那么根据回文子串的对称性，有 $x[l'..(l'+r-l)] = x[l..r] = p$，这与 $x[l..r]$ 是 $p$ 的首次出现矛盾。
+
+<div v-click class=corollary>
+
+一个长为 $n$ 的字符串的**不同回文子串**的数量不超过 $n$。
+</div>
+
+<div v-click class=remark>
+
+我们枚举字符串 $x$ 的每个前缀的最长回文后缀，就可以**不遗漏**地枚举 $x$ 的每一个不同的回文子串。
+</div>
 
 
 ---
 
-# 课堂练习
+# 课堂练习 1
 
-洛谷 [P3805](https://www.luogu.com.cn/problem/P3805)
+[洛谷P3805](https://www.luogu.com.cn/problem/P3805)
+
+给你一个长为 $n$ 的由小写英文字母构成的字符串 $S$，求 $S$ 的最长回文子串的长度。
+
+限制：$1 \le n \le 1.1\times 10^7$。
 
 <div v-click>
 
@@ -983,6 +1125,86 @@ int main() {
 ```
 </div>
 
+---
+
+# 课堂练习 2
+
+[洛谷P4555](https://www.luogu.com.cn/problem/P4555) 最长双回文串
+
+如果一个字符串可以分为非空的两部分，每一部分都是回文串，则称之为**双回文串**。  
+例如 `ab`，`aabb` 都是双回文串。
+
+给你一个长为 $n$ 的字符串 $S$，求 $S$ 的最长双回文子串的长度。
+
+限制：$2 \le n \le 10^5$。
+
+---
+
+```cpp
+int main() {
+    string s;
+    cin >> s;
+    vector<int> rad = manacher(s);
+    int n = s.size();
+    vector<int> a(n - 1);
+    // 计算每个前缀的最长回文后缀的长度
+    for (int i = 0, j = 0; i < n - 1; i++) {
+        while (j / 2 + rad[j] < i)
+            j++;
+        a[i] = i - (j - i) + 1; // 在 s[i] 处结尾的最长回文子串的长度
+    }
+    // 计算每个后缀的最长回文前缀的长度
+    for (int i = n - 1, j = 2 * n - 2; i >= 1; i--) {
+        while ((j + 1) / 2 - rad[j] > i)
+            j--;
+        a[i - 1] += (j - i) - i + 1; // 在 s[i] 处开头的最长回文子串的长度
+    }
+    cout << *max_element(a.begin(), a.end()) << '\n';
+}
+```
+
+---
+
+# 课堂练习 3
+
+[洛谷P4287](https://www.luogu.com.cn/problem/P4287) 双倍回文
+
+设 $x$ 是一个非空字符串，如果存在字符串 $w$ 使得 $x = w\rev{w}w\rev{w}$，则称 $x$ 是一个**双倍回文**。换句话说，若要 $x$ 是双倍回文，它的长度必须是 $4$ 的倍数，而且 $x$，$x$ 的前半部分，$x$ 的后半部分都要是回文。
+
+给你一个长为 $n$ 的字符串，计算它的最长双倍回文子串的长度。
+
+限制：$1 \le n \le 500000$。
+
+<div class=algorithm>
+
+1. 用 Manacher 算法求出 $x$ 的回文半径数组。
+2. 利用 $x$ 的回文半径数组算出 $x$ 的每个前缀的最长回文后缀的长度。
+3. 通过枚举 $x$ 的每个前缀的最长回文后缀的方式来枚举 $x$ 的每个回文子串。对于长度是 $4$ 的倍数的回文子串，检查它的前一半是不是回文子串。
+</div>
+
+---
+
+```cpp
+int main() {
+  int n;
+  string s;
+  cin >> n >> s;
+  vector<int> rad = manacher(s);
+  int ans = 0;
+  for (int i = 0, j = 0; i < n; i++) {
+    while (j / 2 + rad[j] < i)
+      j++;
+    // 回文子串是 s[(j - i)..i]
+    int len = i - (j - i) + 1;
+    if (len % 4 == 0) {
+      int k = i - len / 2 + 1; // 后一半是 s[k..i]
+      if (rad[k + i] >= len / 4)
+        ans = max(ans, len);
+    }
+  }
+  cout << ans << '\n';
+}
+```
 ---
 
 # 题目研究
@@ -1007,14 +1229,386 @@ Palindrome Construction [abc349_g](https://atcoder.jp/contests/abc349/tasks/abc3
 
 ---
 
+<div class=question>
+
+找出一个字符串的所有不同的回文子串。
+</div>
+
+- 例：`abbababa` 有 8 个不同的回文子串，是 `a`，`b`，`bb`，`aba`，`bab`，`abba`，`ababa`，`babab`。
+
+<div v-click class=lemma>
+
+设 $S$ 是一个字符串，$c$ 是一个字符。字符串 $Sc$ 至多含有一个 $S$ 没有的回文子串。  
+这个新的回文子串是 $Sc$ 的最长回文后缀。
+</div>
+
+---
+
+<div class=algorithm>
+
+输入：一个长为 $n$ 的字符串 $S$。
+
+输出：$S$ 的所有不同的回文子串。
+
+从左往右，每次添加 $S$ 的一个字符。
+
+我们用一种称为**回文树**（eertree）的数据结构来存储当前已知的 $S$ 的前缀的所有的回文子串。
+
+当添加第 $i$ 个字符 $S[i]$ 时，我们已经知道 $S[1..(i-1)]$ 的所有回文子串，利用回文树我们可以找出 $S[1..i]$ 的最长回文后缀，并且判断它是否已经出现过。
+
+</div>
+
+
+
+---
+layout: two-cols
+---
+
+字符串 `eertree` 的回文树
+
+![center](./eertree2.png){width=300}
+
+::right::
+
+- 一个字符串的回文树是一个**有向图**。
+- 黑色的圆圈是回文树的**节点**。每个节点有一个编号。
+- 两个特殊节点：
+  - 节点 $0$，对应空串。
+  - 节点 $-1$，对应一个假想的长度是 $-1$ 字符串。
+- 其他节点从 1 开始编号，和回文子串一一对应。
+- 黑色的箭头是回文树的**边**。每条边上标着一个字符。
+- 蓝色的箭头称为**后缀链接**（suffix link），指向一个节点的**最长回文严格后缀**。
+
+<style>
+.two-cols {
+  column-gap: 20px; /* Adjust the gap size as needed */
+}
+</style>
+
+---
+
+![center](./eertree3.drawio.svg){width=550}
+
+---
+
+# 回文树的代码实现
+
+```cpp {*}{maxHeight:'405px'}
+struct eertree {
+  struct node {
+    int len; //节点对应的回文子串的长度
+    int link; //最长回文严格后缀对应的节点
+    int go[26];
+  };
+
+  vector<node> a; //存储节点的数组
+  vector<int> s; //当前字符串
+  int p; //当前字符串的最长回文后缀对应的节点
+
+  eertree() {
+    a.push_back({-1, -1});
+    a.push_back({0, 0});
+    p = 1; // 当前字符串的最长回文后缀，1号点代表空串。把 p 的初始值设为 0 也可以。
+  }
+
+  int add(int c) { //在当前字符串 s 的末尾添加字符c，c是0到25的整数。返回(s+c)的最长回文后缀。
+    int i = s.size(); // 已经添加了 i 个字符
+    s.push_back(c);
+    // 第一步
+    while (p && (a[p].len == i || s[i - 1 - a[p].len] != c)) { // 沿着后缀链接跳
+      p = a[p].link;
+    }
+    if (a[p].go[c] != 0) {
+      p = a[p].go[c];
+      return p; // 没有新的回文子串
+    }
+    // 第二步：新增一个节点，编号是 a.size()
+    a[p].go[c] = a.size();
+    int len = len[p] + 2;
+    // 计算新节点的后缀链接
+    int link;
+    if (p == 0) link = 1;
+    else {
+      while (1) { // 沿着后缀链接跳
+        p = a[p].link;
+        if (s[i - 1 - a[p].len] == c) //即使 p == 0，a[p].len == -1 也不会越界
+          break;
+      }
+      link = a[p].go[c];
+    }
+    p = a.size();
+    a.push_back({len, link});
+    return p;
+  }
+};
+```
+
+---
+
+# 课堂练习 4
+
+[洛谷P5496](https://www.luogu.com.cn/problem/P5496)
+
+给你一个长为 $n$ 的字符串 $S$。对每个 $i = 1, 2,\dots, n$，计算 $S[1..i]$ 的回文后缀的个数。
+
+限制：$1 \le n \le 5 \times 10^5$。**强制在线**：在算出 $S[1..i]$ 的答案之后才能知道 $S[i+1]$。
+
+<div v-click class=algorithm>
+
+1. 构建 $S$ 的回文树。$\mathsf{add}(S[i])$ 返回前缀 $S[1..i]$ 的**最长回文后缀** $\mathsf{maxSuf}(S[1..i])$。
+2. 对回文树的每个节点 $u$，我们计算节点 $u$ 的**回文后缀**的个数，记作 $\mathsf{cntSuff}[u]$。有
+    $$\mathsf{cntSuff}[u] = 1 + \mathsf{cntSuff}[\mathsf{link}[u]]$$  
+    $\mathsf{link}[u]$ 表示 $u$ 的**最长回文严格后缀**节点，也就是 $u$ 的后缀链接指向的节点。
+3. $S[1..i]$ 的回文后缀的个数就是 $\mathsf{cntSuff}[\mathsf{maxSuf}(S[1..i])]$。
+</div>
+
+---
+
+```cpp
+int main() {
+  string s;
+  cin >> s;
+  int k = 0;
+  eertree tree;
+  vector<int> cnt_suff(s.size() + 2);
+  for (char c : s) {
+    int p = tree.add((c - 'a' + k) % 26);
+    if (cnt_suff[p] == 0) { //节点p 是新的
+      cnt_suff[p] = cnt_suff[tree.a[p].link] + 1;
+    }
+    k = cnt_suff[p];
+    cout << k << ' ';
+  }
+  cout << '\n';
+}
+```
+
+---
+
+# 课堂练习 5
+
+[洛谷P3649](https://www.luogu.com.cn/problem/P3649)
+
+给你一个由小写英文字母组成的字符串 $s$。我们定义 $s$ 的一个子串的**出现值**（occurrence value）为这个子串在 $s$ 中出现的次数乘以这个子串的长度。
+
+求 $s$ 的所有回文子串的最大出现值。
+
+限制：$1 \le |s| \le 300000$。
+
+
+<div v-click class=algorithm>
+
+1. 找出 $s$ 的每个前缀 $s[1..i]$ 的最长回文后缀 $\mathsf{maxSuf(s[1..i])}$。  
+2. 统计每个回文子串 $v$ 作为前缀的最长回文后缀而出现的次数，记作 $\mathsf{occAsMax}[v]$。  
+    $\mathsf{occAsMax}[v]$ 就是有多少个 $i$ 满足 $\mathsf{maxSuf}(s[1..i]) = v$。
+3. 把回文子串 $v$ 在 $s$ 中出现的次数记作 $\mathsf{occ}[v]$，我们有
+    $$\mathsf{occ}[v] = \mathsf{occAsMax}[v] + \sum_{u\colon\mathsf{link}[u] = v} \mathsf{occ}[u]$$
+
+</div>
+
+---
+
+````md magic-move
+```cpp
+int main() {
+  string s;
+  cin >> s;
+  eertree tree;
+  vector<int> max_suff;
+  for (char c : s) {
+    max_suff.push_back(tree.add(c - 'a'));
+  }
+  int m = tree.a.size();
+  vector<int> occ_as_max(m);
+  for (int i : max_suff)
+    occ_as_max[i]++;
+  vector<int> occ(m);
+  for (int i = m - 1; i > 1; i--) {
+    occ[i] += occ_as_max[i];
+    occ[tree.a[i].link] += occ[i];
+  }
+  long long ans = 0;
+  for (int i = 2; i < m; i++) {
+    ans = max(ans, (long long) tree.a[i].len * occ[i]);
+  }
+  cout << ans << '\n';
+}
+```
+
+```cpp
+int main() {
+  string s;
+  cin >> s;
+  eertree tree;
+  vector<int> max_suff;
+  for (char c : s) {
+    max_suff.push_back(tree.add(c - 'a'));
+  }
+  int m = tree.a.size();
+  vector<int> occ(m);
+  for (int i : max_suff)
+    occ[i]++;
+  for (int i = m - 1; i > 1; i--) {
+    occ[tree.a[i].link] += occ[i];
+  }
+  long long ans = 0;
+  for (int i = 2; i < m; i++) {
+    ans = max(ans, (long long) tree.a[i].len * occ[i]);
+  }
+  cout << ans << '\n';
+}
+```
+
+```cpp
+int main() {
+  string s;
+  cin >> s;
+  eertree tree;
+  vector<int> occ(s.size() + 2);
+  for (char c : s) {
+    occ[tree.add(c - 'a')]++;
+  }
+  int m = tree.a.size();
+  for (int i = m - 1; i > 1; i--) {
+    occ[tree.a[i].link] += occ[i];
+  }
+  long long ans = 0;
+  for (int i = 2; i < m; i++) {
+    ans = max(ans, (long long) tree.a[i].len * occ[i]);
+  }
+  cout << ans << '\n';
+}
+```
+
+````
+
+---
+
 # 周期
 
+<div class=definition>
 
+设 $x$ 是一个非空字符串，$p$ 是整数，$1 \le p \le |x|$。如果对每个 $i = 1, 2, \dots, |x|-p$ 都有
+$$
+x[i] = x[i+p]
+$$
+就称 $p$ 是 $x$ 的一个**周期**（period）。
+
+注意到 $x$ 至少一个周期，就是 $|x|$。我们把 $x$ 的最小周期记作 **$\mathrm{per}(x)$**。
+</div>
+
+- 例：字符串 $x = \texttt{aabaabaa}$ 的周期有 $3, 6, 7, 8$ 而 $x$ 的最小周期是 $\mathrm{per}(x) = 3$。
+
+<div v-click class=proposition>
+
+设 $p$ 是字符串 $x$ 的一个周期，$k$ 是正整数。如果 $kp \le |x|$，那么 $kp$ 也是 $x$ 的周期。
+
+</div>
+
+---
+
+# border 和周期
+
+border 和周期这两个概念是**对偶**的。
+
+<div class=topic-box>
+
+设 $x$ 是一个长为 $n$ 的字符串。对于正整数 $1 \le p \le n$，
+$$
+\text{$p$ 是 $x$ 的周期} \iff \text{$x[1..n-p]$ 是 $x$ 的 border}。
+$$
+</div>
+
+![center](./period_border_dual.svg){width=600}
 
 ---
 
 # 周期引理
 
+<div class=lemma>
+
+设 $x$ 是非空字符串，$p, q$ 是正整数。如果 $p, q$ 是 $x$ 的周期并且
+$$ p + q - \gcd(p, q) \le |x|,$$
+那么 $\gcd(p, q)$ 也是 $x$ 的一个周期。
+</div>
+
+
+证明：$p = q$ 时显然成立。不妨设 $p < q$。
 
 ---
 
+我们先来考虑一个问题：
+
+<div class=question>
+
+$q$ 个点等间距地分布在长为 $q$ 的圆周上。从 $q$ 个点中的任意一点出发，按顺时针方向在圆上走，每一步的长度是 $p$。走多少步之后首次回到出发点？
+
+</div>
+
+<div v-click>
+
+走到出发点 $\iff$ 走过的距离是圆周长 $q$ 的倍数。所以
+- 当走过的距离是 $p, q$ 的**最小公倍数** $\lcm(p, q)$ 时，首次回到起点，走了 $\lcm(p, q) / p$ 步。
+- 在首次回到起点之前经过的点两两不同。一共经过了 $\lcm(p, q) / p = q/\gcd(p, q)$ 个点。
+
+</div>
+
+---
+
+
+- $q$ 是 $x$ 的周期，就是说**下标模 $q$ 同余的位置**上的字符都相同。
+- 模 $q$ 的同余类有 $q$ 个，用 $0, 1, \dots, q-1$ 表示。如下图所示（以 $q = 10$ 为例）
+    ![center](./period_q.svg){width=100}
+- $p$ 是 $x$ 的周期，也就是说对于每个 $i = 1,2,\dots,|x| - p$ 有 $x[i] = x[i+p]$。因此 $i$ 和 $i+p$ 所属的**模 $q$ 同余类**对应的字符是相同的，在上图中，我们把两者连起来。得到下面的图（以 $p = 4$ 为例）
+    ![center](./period_q_2.svg)
+
+---
+
+![center](./period_q_2.svg)
+- 如果字符串 $x$ 不够长，有些边实际上不能连。例如，如果 $x$ 的长度小于 $13$，就不能从 8 连向 2。
+- 如果 $|x| \ge p + q$，那么所有边都能连。
+- $p$ 是 $x$ 的周期这件事把模 $q$ 的同余类分成 $q/(\lcm(p, q)/p) = \gcd(p, q)$ 组。每一组里有 $q/\gcd(p, q)$ 个同余类。只需要连 $q/\gcd(p,q) - 1$ 条边就可以让一组**连通**。
+- “最后”的 $\gcd(p,q)$ 条边是不需要的。比如 $q = 10, p = 4$ 时，$8$ 到 $2$ 和 $9$ 到 $3$ 的边就是不需要的。
+
+
+---
+
+# 周期引理的推论
+
+<div class=corollary>
+
+设 $x$ 是非空字符串，$p$ 是 $x$ 的周期。如果 $p \le |x|/2$，那么 $p$ 是 $x$ 的最小周期的倍数。
+</div>
+
+<div class=topic-box>
+
+设 $x$ 的最小周期是 $k$，那么 $x$ 的所有不超过 $|x|/2$ 的周期是 $k, 2k, 3k, \dots, \lfloor |x|/2k \rfloor k$。是个**等差数列**。
+</div>
+
+<div class=corollary>
+
+设 $x$ 是非空字符串。$x$ 的所有 border 的长度构成 $O(\log |x|)$ 个等差数列。
+</div>
+
+---
+
+<div class=definition>
+
+设 $x$ 是非空字符串，$p$ 是正整数。若 $p$ 是 $x$ 的周期且 $p$ 整除 $|x|$，则称 $p$ 是 $x$ 的**整周期**。
+</div>
+
+每个非空字符串 $x$ 都至少有一个整周期，$|x|$。
+
+
+<div class=corollary>
+
+若 $x$ 的最小整周期不是 $|x|$，则 $x$ 的最小整周期是 $x$ 的最小周期。
+</div>
+
+<div class=corollary>
+
+$x$ 的所有整周期都是最小整周期的倍数。
+</div>
+
+
+---

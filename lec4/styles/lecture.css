@@ -184,6 +184,31 @@
   font-size: 0.95em;
 }
 
+.algorithm {
+    background-color: rgb(232, 245, 233);
+    position: relative;
+    font-size: 0.9em;
+    border-width: 2px;
+    border-style: solid;
+    border-color: rgb(47, 211, 85);
+    border-image: initial;
+    padding: 35px 15px 4px;
+    margin: 10px 0px 2px;
+    border-radius: 8px;
+}
+
+.algorithm::before {
+    content: "算法";
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: rgb(47, 211, 85);
+    color: rgb(255, 255, 255);
+    font-size: 0.8em;
+    padding: 2px 8px;
+    border-radius: 6px 0px 8px;
+}
+
 .topic-box {
   border: 2px solid #ff9800;
   background-color: #fff3e0;
@@ -222,7 +247,7 @@ strong {
   @apply text-center text-sm text-gray-500 mt-0;
 }
 
-  img[alt~="center"] {
-    display: block;
-    margin: 0 auto;
-  }
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}

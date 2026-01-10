@@ -8,6 +8,7 @@ export default defineKatexSetup(() => {
         '\\lcp': '\\mathrm{lcp}',
         '\\rev' : '\\overleftarrow{#1}',
         '\\rad' : '\\operatorname{rad}',
+        '\\lcm' : '\\operatorname{lcm}',
     },
   }
 })
