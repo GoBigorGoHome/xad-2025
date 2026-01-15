@@ -988,7 +988,7 @@ vector<int> manacher(string s) {
 
 ---
 
-如果我们只需要求长度是奇数的回文子串，那么代码可以简化。
+如果我们只需要长度是奇数的回文子串，那么代码可以简化。
 
 ```cpp
 vector<int> manacher_odd(string s) {
@@ -1009,7 +1009,7 @@ vector<int> manacher_odd(string s) {
 }
 ```
 
-类似地，如果我们只需要求长度是偶数的回文子串，代码也可以简化。
+类似地，如果我们只需要长度是偶数的回文子串，代码也可以简化。
 
 ---
 
@@ -1078,7 +1078,6 @@ for (int i = n - 1, j = 2 * n - 2; i >= 0; i--) {
 }
 ```
 
-这里可以看出回文子串的**对称性**。
 
 ---
 
@@ -1171,15 +1170,15 @@ int main() {
 
 设 $x$ 是一个非空字符串，如果存在字符串 $w$ 使得 $x = w\rev{w}w\rev{w}$，则称 $x$ 是一个**双倍回文**。换句话说，若要 $x$ 是双倍回文，它的长度必须是 $4$ 的倍数，而且 $x$，$x$ 的前半部分，$x$ 的后半部分都要是回文。
 
-给你一个长为 $n$ 的字符串，计算它的最长双倍回文子串的长度。
+给你一个长为 $n$ 的字符串 $S$，计算它的最长双倍回文子串的长度。
 
 限制：$1 \le n \le 500000$。
 
 <div class=algorithm>
 
-1. 用 Manacher 算法求出 $x$ 的回文半径数组。
-2. 利用 $x$ 的回文半径数组算出 $x$ 的每个前缀的最长回文后缀的长度。
-3. 通过枚举 $x$ 的每个前缀的最长回文后缀的方式来枚举 $x$ 的每个回文子串。对于长度是 $4$ 的倍数的回文子串，检查它的前一半是不是回文子串。
+1. 用 Manacher 算法求出 $S$ 的回文半径数组。
+2. 利用 $S$ 的回文半径数组算出 $S$ 的每个前缀的最长回文后缀的长度。
+3. 通过枚举 $S$ 的每个前缀的最长回文后缀的方式来枚举 $S$ 的每个回文子串。对于长度是 $4$ 的倍数的回文子串，检查它的前一半是不是回文子串。
 </div>
 
 ---
@@ -1252,7 +1251,7 @@ Palindrome Construction [abc349_g](https://atcoder.jp/contests/abc349/tasks/abc3
 
 从左往右，每次添加 $S$ 的一个字符。
 
-我们用一种称为**回文树**（eertree）的数据结构来存储当前已知的 $S$ 的前缀的所有的回文子串。
+我们用一种名为**回文树**（eertree）的数据结构来存储当前已知的 $S$ 的前缀的所有的回文子串。
 
 当添加第 $i$ 个字符 $S[i]$ 时，我们已经知道 $S[1..(i-1)]$ 的所有回文子串，利用回文树我们可以找出 $S[1..i]$ 的最长回文后缀，并且判断它是否已经出现过。
 
@@ -1611,4 +1610,435 @@ $x$ 的所有整周期都是最小整周期的倍数。
 </div>
 
 
+
 ---
+
+<div class=question>
+
+一部字典里 $N$ 个单词。回答 $Q$ 个询问，每个询问给你一个字符串 $s$，
+问 $s$ 是不是 $N$ 个单词之一。单词和字符串 $s$ 都只含有小写英文字母。
+</div>
+
+---
+layout: two-cols-header
+---
+
+有五个单词 a，abc，bac，bbc，ca。
+
+为了判断一个字符串是不是单词，我们把全部单词组织成一个有根树，称为**字典树**（trie）。
+
+::left::
+
+![](./trie-example.svg){width=300}
+
+::right::
+
+- 一个节点对应单词的一个前缀
+- 一条边对应一个字符
+- 橙色节点对应单词，称为**单词节点**
+- 叶子是单词节点，但单词节点未必是叶子
+<div v-click class=algorithm>
+
+要检验字符串 $s$ 是不是单词，就看能不能从根节点开始，沿着 $s$ 的每个字符往下走，最后恰好停在一个单词节点。
+</div>
+
+<div v-click class=remark>
+
+利用字典树，我们可以在 $O(|s|)$ 的时间内判断 $s$ 是不是单词。已经是最优的了。
+
+</div>
+
+---
+
+# 字典树的节点数量
+
+
+
+- 字典树的每个节点对应单词的一个前缀。  
+- 字典树的节点数量 = 全部单词的不同前缀的数量。
+- 字典数的节点数量 ≤ (全部单词的长度之和 + 1)
+
+<div v-click class=question>
+
+有 $N$ 个单词，总长度是 $L$，字典树最多有多少个节点？
+</div>
+
+<div class=topic-box v-click>
+
+让一个单词尽可能长，字典树的节点最多。
+
+有 $N-1$ 个单词长度都是 $1$，一个单词的长度是 $L-N+1$ 时，字典树的节点最多。
+
+问题的答案还跟**字符集**大小有关。
+</div>
+
+---
+
+<div class=question>
+
+一百万个长度是 $30$ 的 01 字符串，它们的字典树最多有多少个节点？
+
+</div>
+
+<div v-click class=topic-box>
+
+要让字典树的节点尽可能多，就要让重复的前缀尽可能短、尽可能少。  
+换言之，就要让各种前缀都有。
+
+**占满**字典树的第 $m$ 层（从 $0$ 数起），需要 $2^m$ 个字符串。  
+所以一百万个字符串最多能占满字典树的第 $⌊\log_2 10^6 ⌋ = 19$ 层。
+
+最坏的情况下，第 $19$ 层以下的节点不会被两个单词共用。  
+换言之，没有两个单词有长度大于 $19$ 的公共前缀。
+
+此时字典树有
+$$1 + 2 + 2^2 + \dots + 2^{19} + 10^{6}\cdot(30 - 19) = 12048575$$
+个节点。
+</div>
+
+---
+
+# 构建字典树
+
+![center](./construct_trie_2.svg){width=800}
+
+- 先创建根节点，再把单词逐个加入字典树。
+- 在加入单词的过程中创建需要的节点。
+
+---
+
+# 字典树的代码实现
+
+![center](./construct_trie.svg){width=800}
+
+- 给每个节点一个编号，从 $0$ 开始。
+- 用 vector 存储节点。
+
+---
+
+```cpp
+template <int sigma_size, char alpha>
+struct Trie {
+  vector<array<int, sigma_size>> go;
+
+  int new_node() {
+    go.push_back({});
+    return go.size() - 1;
+  }
+
+  Trie() {
+    new_node(); //创建根节点
+  }
+
+  int add(string s) {
+    int p = 0;
+    for (char c : s) {
+      int i = c - alpha;
+      if (go[p][i] == 0) {
+        go[p][i] = new_node();
+      }
+      p = go[p][i];
+    }
+    return p;
+  }
+};
+```
+
+---
+
+# 字典树的应用
+
+Word Combinations
+
+给你一个长为 $n$ 的字符串 $S$ 和 $k$ 个单词。字符串 $S$ 和单词都由小写英文字母组成。  
+用单词拼 $S$，每个单词可以使用多次，有多少种方式？  
+输出答案除以 $10^9+7$ 的余数。
+
+$1 \le n \le 5000$，$1 \le k \le 10^5$，单词的总长度不超过 $10^6$，单词两两不同。
+
+<div v-click class=algorithm>
+
+令 $f[i]$ 为用单词拼 $S[1..i]$ 有多少种方式。对于每个 $j = i + 1, \dots, n$，如果子串 $S[i+1..j]$ 是单词，那么就能从 $f[i]$ 转移到 $f[j]$。
+
+构建 $k$ 个单词的字典树，就可以在 $O(n)$ 时间内，对每个 $j$ 检验 $S[i+1..j]$ 是不是单词。
+
+</div>
+
+---
+
+```cpp {*}{maxHeight:'460px'}
+int main() {
+  string s;
+  int k;
+  cin >> s >> k;
+  Trie<26, 'a'> trie;
+  vector<int> id(k);
+  for (int i = 0; i < k; i++) {
+    string w;
+    cin >> w;
+    id[i] = trie.add(w);
+  }
+  vector<bool> is_word(trie.go.size());
+  for (int i : id) {
+    is_word[i] = true;
+  }
+  const int mod = 1e9 + 7;
+  int n = s.size();
+  vector<int> f(n + 1);
+  f[0] = 1;
+  for (int i = 0; i < n; i++) {
+    int p = 0;
+    for (int j = i; j < n; j++) {
+      p = trie.go[p][s[j] - 'a'];
+      if (p == 0)
+        break;
+      if (is_word[p]) {
+        f[j + 1] += f[i];
+        if (f[j + 1] >= mod)
+          f[j + 1] -= mod;
+      }
+    }
+  }
+}
+```
+
+---
+
+# 字典树的应用
+
+Xor Sum
+
+给你 $N$ 个正整数 $A_1, \dots, A_N$。回答 $M$ 个询问。每个询问给你一个正整数 $S$，输出 $\max_{1 \le i \le N} \set{A_i \oplus S}$。
+
+- $1 \le N, M \le 100000$
+- $1 \le S, A_i < 2^{32}$
+
+<div class=topic topic=贪心>
+
+先看有没有 $A_i$ 使得 $A_i\oplus S$ 的二进制最高位（第 $31$ 位）是 $1$，也就是看有没有 $A_i$ 和 $S$ 在第 $31$ 位不同。  
+若有，就在这样的 $A_i$ 里选。
+
+然后看能否让 $A_i \oplus S$ 的第 $30$ 位是 $1$，依此类推。
+</div>
+
+<div v-click>
+
+为了实现上述过程，我们把每个 $A_i$ 的二进制写法看作一个长为 $32$ 的 01 串，构建这 $N$ 个 01 串的字典树。
+
+这样的字典树的字符集是 0 和 1，我们称之为 **01 字典树**。
+
+</div>
+
+---
+
+# 01 字典树的程序实现
+
+```cpp {*}{maxHeight: '442px'}
+struct binary_trie {
+  int width; //二进制位数
+  vector<array<int,2>> go;
+  int new_node() {
+    go.push_back({});
+    return go.size() - 1;
+  }
+
+  binary_trie(int width) : width(width) {
+    new_node();
+  }
+
+  int add(unsigned x) {
+    int p = 0;
+    for (int i = width - 1; i >= 0; i--) {
+      int b = x >> i & 1;
+      if (go[p][b] == 0) {
+        go[p][b] = new_node();
+      }
+      p = go[p][b];
+    }
+    return p;
+  }
+
+  unsigned max_xor(unsigned x) {
+    unsigned ans = 0;
+    int p = 0;
+    for (int i = width - 1; i >= 0; i--) {
+      int b = x >> i & 1;
+      if (go[p][b ^ 1]) {
+        ans |= 1 << i;
+        p = go[p][b ^ 1];
+      } else {
+        p = go[p][b];
+      }
+    }
+    return ans;
+  }
+};
+```
+
+
+---
+
+# 课堂练习
+
+最长异或路径 [洛谷P4551](https://www.luogu.com.cn/problem/P4551)
+
+给你一个 $n$ 个点的树，点从 $1$ 到 $n$ 编号。第 $i$ 条边连接点 $u_i$ 和 $v_i$，权值是非负整数 $w_i$。  
+路径的权值定义为路径上边的权值的异或和。
+
+求路径权值的最大值。
+
+$1 \le n \le 10^5$，$0 \le w < 2^{31}$
+
+<div v-click class=topic-box>
+
+考虑以 $1$ 号点为根的有根树。
+
+把路径 $x, y$ 的权值记作 $f(x, y)$，有 $f(x, y) = f(1, x) \oplus f(1, y)$。
+
+于是问题的答案就是 $\max_{1 \le x, y \le n} f(1,x) \oplus f(1,y)$。
+</div>
+
+---
+
+```cpp {*}{maxHeight: '442px'}
+struct binary_trie {
+  int width; //二进制位数
+  vector<array<int,2>> go;
+  int new_node() {
+    go.push_back({});
+    return go.size() - 1;
+  }
+
+  binary_trie(int width) : width(width) {
+    new_node();
+  }
+
+  int add(int x) {
+    int p = 0;
+    for (int i = width - 1; i >= 0; i--) {
+      int b = x >> i & 1;
+      if (go[p][b] == 0) {
+        go[p][b] = new_node();
+      }
+      p = go[p][b];
+    }
+    return p;
+  }
+
+  int max_xor(int x) {
+    int ans = 0;
+    int p = 0;
+    for (int i = width - 1; i >= 0; i--) {
+      int b = x >> i & 1;
+      if (go[p][b ^ 1]) {
+        ans |= 1 << i;
+        p = go[p][b ^ 1];
+      } else {
+        p = go[p][b];
+      }
+    }
+    return ans;
+  }
+};
+
+const int maxn = 1e5 + 5;
+vector<pair<int, int>> g[maxn];
+int f[maxn];
+void dfs(int u, int p) {
+  for (auto [v, w] : g[u])
+    if (v != p) {
+      f[v] = f[u] ^ w;
+      dfs(v, u);
+    }
+}
+
+int main() {
+  int n; cin >> n;
+  for (int i = 0; i < n - 1; i++) {
+    int u, v, w; cin >> u >> v >> w;
+    g[u].push_back({v, w});
+    g[v].push_back({u, w});
+  }
+  dfs(1, 0);
+  binary_trie trie(31);
+  for (int i = 1; i <= n; i++)
+    trie.add(f[i]);
+  int ans = 0;
+  for (int i = 1; i <= n; i++)
+    ans = max(ans, trie.max_xor(f[i]));
+  cout << ans << '\n';
+}
+```
+
+---
+
+# 课堂练习
+
+Secret Message [洛谷P2922](https://www.luogu.com.cn/problem/P2922)
+
+给你 $M$ 个 01 串 $S_1, \dots, S_M$，$S_i$ 的长度是 $b_i$。回答 $N$ 个询问，第 $j$ 个询问给你一个长为 $c_j$ 的 01 串 $T_j$，求有多少个 $i$ 满足
+- $1 \le i \le M$
+- $S_i$ 是 $T_j$ 的前缀或 $T_j$ 是 $S_i$ 的前缀。
+
+限制：$1 \le N, M \le 50000$，$1 \le b_i, c_j \le 10000$。
+
+<div v-click class=topic-box>
+
+1. 构建 $S_1, \dots, S_M$ 的字典树。
+2. 对字典树的每个节点 $u$，我们计算两个东西
+    - 有多少个单词等于 $u$。
+    - $u$ 是多少单词的**严格前缀**。
+4. 对询问 $T_j$ 的每个前缀，我们知道有多少个单词等于它。
+5. 如果 $T_j$ 在字典树里，我们知道它是多少个单词的严格前缀。
+</div>
+
+---
+
+```cpp {*}{maxHeight:'442px'}
+int main() {
+  int m, n;
+  cin >> m >> n;
+  Trie<2, '0'> trie;
+  vector<string> s(m);
+  for (int i = 0; i < m; i++) {
+    int len; cin >> len;
+    s[i].resize(len);
+    for (int j = 0; j < len; j++)
+      cin >> s[i][j];
+    trie.add(s[i]);
+  }
+  vector<int> cnt_word(trie.go.size());
+  vector<int> cnt_supper(trie.go.size());
+  for (int i = 0; i < m; i++) {
+    int p = 0;
+    for (char c : s[i]) {
+      cnt_supper[p]++;
+      p = trie.go[p][c - '0'];
+    }
+    cnt_word[p]++;
+  }
+  // 回答询问
+  for (int i = 0; i < n; i++) {
+    int len;
+    cin >> len;
+    vector<int> t(len);
+    for (int j = 0; j < len; j++)
+        cin >> t[j];
+    
+    int p = 0;
+    int ans = 0;
+    for (int c : t) {
+      p = trie.go[p][c];
+      if (p == 0) break;
+      ans += cnt_word[p];
+    }
+    if (p)
+      ans += cnt_supper[p];
+    cout << ans << '\n';
+  }
+}
+```
+
+---
+
+#
