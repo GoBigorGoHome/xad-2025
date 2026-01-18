@@ -1171,6 +1171,83 @@ struct Trie {
 
 ---
 
+## 两个写法
+
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+
+```cpp
+template<int sigma_size, char alpha>
+struct Trie {
+  //...
+  vector<int> link; // 后缀链接
+  vector<int> bfs; // 按 BFS 序存储的节点
+  int get(int p, int i) { //试图从节点p走边i
+    while (p != -1 && !go[p][i]) {
+      p = link[p];
+    }
+    return p == -1 ? 0 : go[p][i];
+  }
+
+  void calc_suffix_link() {
+    link.resize(go.size());
+    bfs.resize(go.size()); // 队列
+    int p = 0, q = 0; // 队列的开头和结尾
+    link[0] = -1; // 根节点没有后缀链接
+    bfs[q++] = 0; // 根节点入队
+
+    while (p != q) {
+      //...
+    }
+  }
+};
+```
+</div>
+
+
+<div>
+
+```cpp {*}{maxHeight: '470px'}
+template<int sigma_size, char alpha>
+struct Trie {
+  // ...
+  vector<int> link; // 后缀链接
+  vector<int> bfs; // 按 BFS 序存储的节点
+  int get(int p, int i) { //试图从节点p走边i，p >= 0
+    while (p != 0 && !go[p][i]) {
+      p = link[p];
+    }
+    return go[p][i];
+  }
+
+  void calc_suffix_link() {
+    link.resize(go.size());
+    bfs.resize(go.size() - 1); // 根不入队
+    int p = 0, q = 0; // 队列的开头和结尾
+    // link[0] 用不到，就不赋值了
+    for (int i = 0; i < sigma_size; i++) {
+      if (go[0][i]) {
+        link[go[0][i]] = 0;
+        bfs[q++] = go[0][i];
+      }
+    }
+    while (p != q) {
+      //...
+    }
+  }
+};
+```
+</div>
+
+
+</div>
+
+
+
+
+---
+
 # 例题 1
 
 Find Patterns [CSES 2102](https://cses.fi/problemset/task/2102/)
@@ -1265,4 +1342,22 @@ int main() {
   for (int i : id)
     cout << cnt[i] << '\n';
 }
+```
+
+---
+
+# AC 自动机的另一种写法
+
+把字典树缺的边补全
+
+![](./trie-with-extra-edges.svg){width=500}
+
+
+
+---
+
+# 代码实现
+
+```cpp
+
 ```
