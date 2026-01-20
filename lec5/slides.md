@@ -573,7 +573,7 @@ int main() {
 
 
 
---- 
+---
 
 # 紧凑的字典树实现
 
@@ -748,7 +748,7 @@ $1 \le n \le 10^5$，$1 \le k \le 5\times 10^5$，模式串的总长度不超过
 
 
 
-----
+---
 
 # 多模式匹配问题
 
@@ -955,10 +955,17 @@ layout: two-cols-header
 
 </div><div>
 
-<div class=topic-box v-click>
+<div v-click>
 
-字典树加上后缀链接，这样的数据结构叫作 **AC 自动机**（Aho-Corasick automaton）。
+字典树加上后缀链接，得到的数据结构叫作 **AC 自动机**（Aho-Corasick automaton）。
 
+</div>
+
+<div v-click class=topic topic="在 AC 自动机上跑文本串">
+
+- 一开始我们在根节点。
+- 我们把文本串 $T$ “喂给” AC 自动机，每次喂一个字符，根据此字符在 AC 自动机在跑。
+- 当把前 $i$ 个字符喂给 AC 自动机后，假设我们到达节点 $v$，那么 $v$ 是字典树中 $T[1..i]$ 的**最长后缀**。我们就说**节点 $v$ 被 $T[1..i]$ 匹配到**。
 </div>
 
 </div>
@@ -1072,13 +1079,13 @@ struct Trie {
       int u = q.front();
       q.pop();
       for (int i = 0; i < sigma_size; i++) {
-        if (g[u][i]) {
+        if (go[u][i]) {
           int v = link[u];
           while (v != -1 && !go[v][i]) {
             v = link[v];
           }
-          link[g[u][i]] = (v == -1 ? 0 : go[v][i]);
-          q.push(g[u][i]);
+          link[go[u][i]] = (v == -1 ? 0 : go[v][i]);
+          q.push(go[u][i]);
         }
       }
     }
@@ -1299,7 +1306,7 @@ int main() {
 
 # 例题 2
 
-Counting Patterns [CSES 2103](https://cses.fi/problemset/task/2103)
+[洛谷 P5357](https://www.luogu.com.cn/problem/P5357)
 
 <div class=question>
 
@@ -1309,7 +1316,7 @@ Counting Patterns [CSES 2103](https://cses.fi/problemset/task/2103)
 
 模式串和文本串都由小写字母组成。
 
-$1 \le n \le 10^5$，$1 \le k \le 5\times 10^5$，模式串的总长度不超过 $5 \times 10^5$。
+$1 \le n \le 2 \times 10^6$，$1 \le k \le 2\times 10^5$，模式串的总长度不超过 $2 \times 10^5$。
 
 </div>
 
@@ -1346,18 +1353,301 @@ int main() {
 
 ---
 
-# AC 自动机的另一种写法
+# AC 自动机的另一种实现
 
-把字典树缺的边补全
+<div class="grid grid-cols-2">
 
-![](./trie-with-extra-edges.svg){width=500}
+<div>
 
+字典树 + 后缀链接
 
+![](./trie_and_suffix_links.svg){class='scale-200 origin-top-left'}
+
+</div>
+
+<div>
+
+把字典树的边补全
+
+![](./trie-with-extra-edges.svg){class='scale-200 origin-top-left'}
+
+</div>
+
+</div>
+
+<!-- 把左边三个点的边补全 -->
 
 ---
 
-# 代码实现
+# 代码
+
+<div class='grid grid-cols-2 gap-4'>
+
+<div>
 
 ```cpp
+template<int sigma_size, int (*ctoi)(char)>
+struct Trie {
+  vector<array<int, sigma_size>> go;
+  int new_node() {
+    go.push_back({});
+    return (int) go.size() - 1;
+  }
 
+  Trie() {
+    new_node();
+  }
+
+  int add(string s) {
+    int p = 0;
+    for (char c : s) {
+      int i = ctoi(c);
+      if (go[p][i] == 0) {
+        go[p][i] = new_node();
+      }
+      p = go[p][i];
+    }
+    return p;
+  }
 ```
+
+</div>
+
+<div>
+
+```cpp {*}{startLine: 24}
+  vector<pair<int,int>> get_suffix_link() {
+    vector<pair<int,int>> q; //队列
+    for (int i = 0; i < sigma_size; i++)
+      if (go[0][i])
+        q.push_back({go[0][i], 0});
+    for (int j = 0; j < q.size(); j++) {
+      int u = q[j].first, v = q[j].second;
+      for (int i = 0; i < sigma_size; i++)
+        if (go[u][i])
+          q.push_back({go[u][i], go[v][i]});
+        else
+          go[u][i] = go[v][i]; //把缺的边补上
+    }
+    return q;
+  }
+};
+```
+
+</div>
+
+</div>
+
+---
+
+# 例题
+
+Selling RNA Strands [洛谷 P9196](https://www.luogu.com.cn/problem/P9196)
+
+给你 $N$ 个字符串 $S_1, \dots, S_N$。回答 $M$ 个询问。第 $j$ 个询问给你两个字符串 $P_j, Q_j$，你要回答有多少个 $i$ 满足 $P_j$ 是 $S_i$ 的前缀且 $Q_j$ 是 $S_i$ 的后缀。
+
+- $1 \le N, M \le 10^5$
+- 字符串由 A，G，C，U 四种字符构成。
+- $1 \le |S_i|, |P_j|, |Q_j| \le 10^5$
+- $\sum_i |S_i|, \sum_j |P_j|, \sum_j |Q_j| \le 2\times 10^6$
+
+---
+
+# 分析
+
+<div class=proposition>
+
+设 $S, P, Q$ 是字符串，# 是在 $S, P, Q$ 三者中都没出现的字符。那么  
+$P$ 是 $S$ 的前缀且 $Q$ 是 $S$ 的后缀 $\iff$ $Q$#$P$ 是 $S$#$S$ 的子串。
+
+</div>
+
+<div v-click>
+
+- 询问 $(P_j, Q_j)$ 的答案是模式串 $Q_j$#$P_j$ 在多少个文本串 $S_i$#$S_i$ 里出现过。
+- 由于一个文本串里只有一个 #，所以一个模式串在每个文本串里至多出现一次。
+</div>
+
+<div v-click class=algorithm>
+
+1. 构建 $N$ 个模式串的 AC 自动机。
+2. 在 AC 自动机上跑每个文本串，算出字典树的每个节点被匹配到的次数。
+3. 利用后缀链接反向传播，得到每个模式串在 $M$ 个文本串里出现的次数。
+
+</div>
+
+---
+
+<div class='grid grid-cols-2 gap-4'>
+
+<div>
+
+```cpp
+string sigma = "AGUC#";
+int ctoi(char c) {
+  for (int i = 0; i < 5; i++)
+    if (sigma[i] == c)
+      return i;
+}
+
+int main() {
+  int n, m;
+  cin >> n >> m;
+  vector<string> s(n);
+  for (int i = 0; i < n; i++) {
+    cin >> s[i];
+  }
+  Trie<5, ctoi> trie;
+  vector<int> id(m);
+  for (int i = 0; i < m; i++) {
+    string p, q;
+    cin >> p >> q;
+    id[i] = trie.add(q + '#' + p);
+  }
+```
+
+</div>
+
+<div>
+
+```cpp {*}{startLine: 22}
+  vector<int> cnt(trie.go.size());
+  auto fail = trie.get_suffix_link();
+  for (int i = 0; i < n; i++) {
+    int p = 0;
+    for (char c : s[i] + '#' + s[i]) {
+      p = trie.go[p][ctoi(c)];
+      cnt[p]++;
+    }
+  }
+  reverse(fail.begin(), fail.end());
+  for (auto [u, v] : fail)
+    cnt[v] += cnt[u];
+  for (int i : id)
+    cout << cnt[i] << '\n';
+}
+```
+
+</div>
+
+</div>
+
+---
+
+# 例题
+
+谐音替换 [洛谷P14363](https://www.luogu.com.cn/problem/P14363)
+
+给定 $n$ 个字符串二元组，第 $i$（$1 \le i \le n$）个二元组为 $(S_{i,1}, S_{i,2})$，满足 $|S_{i,1}| = |S_{i,2}|$。
+
+设 $T$ 是字符串。对 $T$ 的**替换**操作指的是
+1. 任选一个 $i$（$1 \le i \le n$）。
+2. 任选一个 $T$ 的子串 $Y$ 满足 $Y = S_{i,1}$。
+3. 把 $Y$ 替换为 $Y' = S_{i,2}$。  
+具体地，设 $T = X + Y + Z$，其中 $X$ 和 $Z$ 可以为空，则 $T$ 变成 $T' = X + Y' + Z$。
+
+回答 $q$ 个问题。第 $j$（$1 \le j \le q$）个问题给你两个**不同**的字符串 $T_{j,1}$ 和 $T_{j,2}$，回答有多少种对字符串 $T_{j,1}$ 的替换能够得到字符串 $T_{j,2}$。两种替换不同当且仅当**子串 $Y$ 的位置不同或用于替换的二元组的编号 $i$ 不同**。
+
+
+- $1 \le n, q \le 2\times 10^5$
+- $1 \le (\sum_{i=1}^{n} |S_{i,1}| + |S_{i,2}|),\ (\sum_{j=1}^{q} |T_{j,1}| + |T_{j,2}|) \le 5 \times 10^6$
+- 字符串由小写英文字母构成。
+
+---
+dragPos:
+  label-1: 597,264,200,40
+  arrow-1: 401,350,198,-68
+  label-2: 733,409,61,34
+  arrow-2: 365,411,367,17
+---
+
+# 分析
+
+
+- 对于询问 $(T_{j,1}, T_{j,2})$，能把 $T_{j,1}$ 变成 $T_{j,2}$ 的必要条件是二者长度相同。 
+- 设二者第一个不同的位置是 $l$，最后一个不同的位置 $r$。
+- 如果 $(S_{i,1}, S_{i,2})$ 能把 $T_{j,1}$ 变成 $T_{j,2}$，设 $S_{i,1}$ 和 $S_{i,2}$ 第一个不同的位置是 $p$，最后一个不同的位置是 $q$，那么需要满足下列条件
+  - $S_{i,1}[p..q] = T_{j,1}[l..r]$ 且 $S_{i,2}[p..q] = T_{j,2}[l..r]$。
+  - $S_{i,1}[1..p-1]$ 是 $T_{j,1}[1..l-1]$ 的后缀。
+  - $S_{i,1}[q+1..]$ 是 $T_{j,1}[r+1..]$ 的前缀。
+- 我们可以把上面的三个条件合成一个：
+  - $S_{i,1}[1..p-1] + \# + S_{i,1}[p..q] + S_{i,2}[p..q] + \# + S_{i,1}[q+1..]$ 是  
+  $T_{j,1}[1..l-1] + \# + T_{j,1}[l..r] + T_{j,2}[l..r] + \# + T_{j,1}[r+1..]$ 的子串。
+<v-clicks at=2>
+
+- 每个模式串在文本串里至多出现一次。
+- 答案是每个模式串在文本串里出现的次数之和。
+</v-clicks>
+
+<v-drag v-click=1 pos="label-1" class="text-red-500 font-bold">
+  模式串
+</v-drag>
+
+<v-drag-arrow v-click=1 pos="arrow-1" color="red" width="3" />
+
+<v-drag v-click=1 pos="label-2" class="text-red-500 font-bold">
+  文本串
+</v-drag>
+
+<v-drag-arrow v-click=1 pos="arrow-2" color="red" width="3" />
+
+---
+layout: full
+---
+
+```cpp
+string work(string a, string b) {
+  int n = (int) a.size();
+  for (int i = 0; i < n; i++)
+    if (a[i] != b[i])
+      for (int j = n - 1; j >= 0; j--)
+        if (a[j] != b[j]) {
+          string k = a.substr(i, j - i + 1) + b.substr(i, j - i + 1);
+          return a.substr(0, i) + '{' + k + '{' + b.substr(j + 1); // '{' 是 'z' 的下一个字符
+        }
+  return "";
+}
+```
+
+<div class="grid grid-cols-2 gap-4">
+
+```cpp {*}{startLine: 12}
+int ctoi(char c) { return c - 'a'; }
+int main() {
+  int n, q; cin >> n >> q;
+  Trie<27, ctoi> trie;
+  vector<int> id;
+  for (int i = 0; i < n; i++) {
+    string s1, s2; cin >> s1 >> s2;
+    string s = work(s1, s2);
+    if (!s.empty()) id.push_back(trie.add(s));
+  }
+  vector<int> weight(trie.go.size()); //节点的权值
+  for (int i : id) weight[i]++;
+  for (auto [u, v] : trie.get_suffix_link())
+    weight[u] += weight[v]; //正向传播
+```
+
+```cpp {*}{startLine: 26}
+  for (int i = 0; i < q; i++) { //回答询问
+    string t1, t2;
+    cin >> t1 >> t2;
+    int ans = 0;
+    if (t1.size() == t2.size()) {
+      int p = 0;
+      for (char c : work(t1, t2)) {
+        p = trie.go[p][c - 'a'];
+        ans += weight[p];
+      }
+    }
+    cout << ans << '\n';
+  }
+}
+```
+
+</div>
+
+
+
+
+
