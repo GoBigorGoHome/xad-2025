@@ -23,6 +23,7 @@ mdc: true
 # duration of the presentation
 duration: 35min
 lineNumbers: true
+colorSchema: light
 ---
 
 # 字符串哈希
@@ -127,11 +128,16 @@ $$h(S[l..r]) = h(S[1..r]) - b^{r - l+1} \cdot h(S[1..l-1]).$$
 
 直觉上，模数 $m$ 越大越好。
 
-$m$ 不应太小，比如
-- 当 $m = 1$ 时，`ab` 和 `ba` 冲突。
-- 当 $m = 2$ 时，`ac` 和 `ba` 冲突。
+$b$ 不应太小，比如
+- 当 $b = 1$ 时，`ab` 和 `ba` 冲突。
+- 当 $b = 2$ 时，`ac` 和 `ba` 冲突。
 
-不难看出，为了避免这样的冲突，$m$ 应该大于等于字符集大小。
+<div class=topic-box>
+
+为了避免这样的冲突，$b$ 应该大于等于字符集大小。  
+我们可以把 $S_1 b^{n-1} + S_2 b^{n-2} + \dots + S_n$ 看作一个 $n$ 位的 **$b$ 进制数**，$S_1, S_2, \dots, S_n$ 是数字。  
+当 $b \ge$ 字符集大小时，不会有两个字符串表示同一个数。
+</div>
 
 ---
 
