@@ -108,6 +108,21 @@ $$3 \times 2 = 6.$$
 
 </div>
 
+<div v-click>
+
+另一种解法，答案是 $(2n)! / (2^{n} n!)$。
+
+</div>
+
+<!-- 
+
+通常约定阶乘的优先级高于乘。
+
+（2n)! / 2^n = 1 * 1 * 3 * 2 * 5 * 3 ... * (2n - 1) * n 
+  所以 (2n)! / (2^n n!) = 1 * 3 * 5 * ... * (2n - 1)
+ -->
+
+
 ---
 
 # 例题
@@ -255,10 +270,142 @@ $$
 1. 从 $n$ 个东西中选择 $r$ 个。
 2. 把所选的 $r$ 个东西按某个顺序排列。
 
-做第一步的方法数是 ${n\choose r}$，做第二步的方法数是 $P(r, r) = r!$。根据乘法原理，我们有 $P(n, r) = r!{n\choose r}$。
+做第一步的方法数是 ${n\choose r}$，做第二步的方法数是 $P(r, r) = r!$。  
+根据乘法原理，我们有 $P(n, r) = r! \cdot {n\choose r}$.
 </div>
 
 ---
+
+<div class=topic topic=对称恒等式>
+
+$$
+{n\choose r} = {n \choose n - r}, \qquad 0 \le r \le n.
+$$
+
+</div>
+
+证明：从组合数公式 ${n\choose r} = {n!\over r!(n-r)!}$ 看，${n \choose n-r}$ 相比 ${n\choose r}$ 无非是交换分母上 $r!$ 和 $(n-r)!$ 的位置。
+
+我们再给出一个**组合证明**：从 $n$ 个元素里选 $r$ 个，所选的 $r$ 个元素和未选的 $(n-r)$ 个元素一一对应。
+
+
+<div class=topic topic="加法公式（帕斯卡公式）"> 
+
+$$
+{n\choose r} = {n-1 \choose r} + {n - 1 \choose r - 1}, \qquad 1 \le r \le n.
+$$
+
+</div>
+
+
+证明：从 $n$ 个不同的东西里选 $r$ 个，选法可以分成两类
+- 不选第一个东西，从其余 $n-1$ 个东西里选 $r$ 个，有 ${n-1 \choose r}$ 种方法。
+- 选第一个东西，再从其余 $n-1$ 个东西里选 $r-1$ 个，有 ${n-1 \choose r-1}$ 种方法。
+
+---
+
+# 计算组合数
+
+- 组合数很大。${10 \choose 5} = 252$，${20 \choose 10} = 184756$，${32 \choose 16}=601080390$（$10^8$），  
+${40\choose 20} = 137846528820$（$10^{11}$），${64 \choose 32}=1832624140942590534$（$10^{18}$）。
+- 所以通常我们只需要计算组合数模某个较大的素数 $p$（比如 $10^9+7$）。
+
+- 加法公式 ${n\choose r} = {n-1 \choose r} + {n - 1 \choose r - 1}$ 可以看作组合数的**递推式**。我们可以利用它来计算组合数。
+```cpp
+const int mod = 1e9 + 7;
+const C[505][505];
+for (int i = 0; i <= 500; i++) {
+  C[i][0] = 1; // 边界条件
+  for (int j = 1; j <= i; j++)
+    C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % mod;
+}
+```
+
+- 当 $n$ 较大时，比如 $10^6$，用递推法计算 ${n\choose r}$ 模 $p$ 就太慢了。此时我们可以利用公式 ${n\choose r} = {n! \over (n-r)! r!}$。  
+我们预先算出 $1!$ 到 $N!$，和它们在模 $p$ 下的**乘法逆元**。然后就能快速算出 ${n! \over (n-r)! r!}$ 模 $p$。
+- 根据**费马小定理**，$x$ 在模 $p$ 下的乘法逆元等于 $x^{p-2}$。可以用**快速幂**计算。
+
+---
+
+# 例题
+
+组合数问题 [洛谷 B3717](https://www.luogu.com.cn/problem/B3717) 
+
+给定整数 $N, T$。回答 $T$ 个询问，每次给出 $n, m$，你要计算 ${n\choose m}$，模 $998244353$。  
+输出所有询问结果的按位异或和。
+
+- $1 \le T \le 5\times 10^6$
+- $0 \le m \le n \le N \le 5 \times 10^6$
+- 时限 2 秒。
+
+---
+
+
+```cpp
+const int mod = 998244353; //是素数
+long long inverse(long long x) {
+  long long ans = 1;
+  int n = mod - 2;
+  while (n > 0) {
+    if (n & 1) ans = ans * x % mod;
+    x = x * x % mod;
+    n >>= 1;
+  }
+  return ans;
+}
+int main() {
+  ios::sync_with_stdio(0);
+  cin.tie(0);
+  int T, N; cin >> T >> N;
+  vector<long long> f(N + 1);
+  f[0] = 1;
+  for (int i = 1; i <= N; i++)
+    f[i] = f[i - 1] * i % mod;
+  long long ans = 0;
+  while (T--) {
+    int n, m; cin >> n >> m;
+    ans ^= f[n] * inverse(f[n - m] * f[m] % mod) % mod;
+  }
+  cout << ans << '\n';
+}
+```
+
+
+<!-- :stopwatch: 1.6 s -->
+
+---
+
+优化：注意到 $n!$ 的乘法逆元乘以 $n$ 就是 $(n-1)!$ 的乘法逆元。我们只需要算 $N!$ 的乘法逆元。
+
+
+```cpp
+int main() {
+  ios::sync_with_stdio(0);
+  cin.tie(0);
+
+  int T, N;
+  cin >> T >> N;
+  vector<long long> f(N + 1), invf(N + 1);
+  f[0] = 1;
+  for (int i = 1; i <= N; i++)
+    f[i] = f[i - 1] * i % mod;
+  invf[N] = inverse(f[N]);
+  for (int i = N; i >= 1; i--)
+    invf[i - 1] = invf[i] * i % mod;
+  long long ans = 0;
+  while (T--) {
+    int n, m;
+    cin >> n >> m;
+    ans ^= f[n] * invf[n - m] % mod * invf[m] % mod;
+  }
+  cout << ans << '\n';
+}
+```
+
+<!-- :stopwatch: 1.11 s -->
+
+---
+
 
 <div class=question>
 
@@ -428,148 +575,6 @@ $$
 \multichoose{n}{r} := {n+r-1 \choose r}
 $$
 读作“$n$ 多选 $r$”。
-
----
-layout: section
----
-
-# 第三节
-
-<p> </p>
-
-组合数的基本性质
-
-计算组合数
-
----
-
-<div class=topic topic=对称恒等式>
-
-$$
-{n\choose r} = {n \choose n - r}, \qquad 0 \le r \le n.
-$$
-
-</div>
-
-证明：从组合数公式 ${n\choose r} = {n!\over r!(n-r)!}$ 看，${n \choose n-r}$ 相比 ${n\choose r}$ 无非是交换分母上 $r!$ 和 $(n-r)!$ 的位置。
-
-我们再给出一个**组合证明**：从 $n$ 个元素里选 $r$ 个，所选的 $r$ 个元素和未选的 $(n-r)$ 个元素一一对应。
-
-
-<div class=topic topic="加法公式（帕斯卡公式）"> 
-
-$$
-{n\choose r} = {n-1 \choose r} + {n - 1 \choose r - 1}, \qquad 1 \le r \le n.
-$$
-
-</div>
-
-
-证明：从 $n$ 个不同的东西里选 $r$ 个，选法可以分成两类
-- 不选第一个东西，从其余 $n-1$ 个东西里选 $r$ 个，有 ${n-1 \choose r}$ 种方法。
-- 选第一个东西，再从其余 $n-1$ 个东西里选 $r-1$ 个，有 ${n-1 \choose r-1}$ 种方法。
-
----
-
-# 计算组合数
-
-- 组合数很大。${10 \choose 5} = 252$，${20 \choose 10} = 184756$，${32 \choose 16}=601080390$（$10^8$），  
-${40\choose 20} = 137846528820$（$10^{11}$），${64 \choose 32}=1832624140942590534$（$10^{18}$）。
-- 所以通常我们只需要计算组合数模某个较大的素数 $p$（比如 $10^9+7$）。
-
-- 加法公式 ${n\choose r} = {n-1 \choose r} + {n - 1 \choose r - 1}$ 可以看作组合数的**递推式**。我们可以利用它来计算组合数。
-```cpp
-const int mod = 1e9 + 7;
-const C[505][505];
-for (int i = 0; i <= 500; i++) {
-  C[i][0] = 1; // 边界条件
-  for (int j = 1; j <= i; j++)
-    C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % mod;
-}
-```
-
-- 当 $n$ 较大时，比如 $10^6$，用递推法计算 ${n\choose r}$ 模 $p$ 就太慢了。此时我们可以利用公式 ${n\choose r} = {n! \over (n-r)! r!}$。  
-我们预先算出 $1!$ 到 $N!$，和它们在模 $p$ 下的**乘法逆元**。然后就能快速算出 ${n! \over (n-r)! r!}$ 模 $p$。
-- 根据**费马小定理**，$x$ 在模 $p$ 下的乘法逆元等于 $x^{p-2}$。可以用**快速幂**计算。
-
----
-
-# 例题
-
-组合数问题 [洛谷 B3717](https://www.luogu.com.cn/problem/B3717) 
-
-给定整数 $N, T$。回答 $T$ 个询问，每次给出 $n, m$，你要计算 ${n\choose m}$，模 $998244353$。  
-输出所有询问结果的按位异或和。
-
-- $1 \le T \le 5\times 10^6$
-- $0 \le m \le n \le N \le 5 \times 10^6$
-- 时限 2 秒。
-
----
-
-
-```cpp
-const int mod = 998244353; //是素数
-long long inverse(long long x) {
-  long long ans = 1;
-  int n = mod - 2;
-  while (n > 0) {
-    if (n & 1) ans = ans * x % mod;
-    x = x * x % mod;
-    n >>= 1;
-  }
-  return ans;
-}
-int main() {
-  ios::sync_with_stdio(0);
-  cin.tie(0);
-  int T, N; cin >> T >> N;
-  vector<long long> f(N + 1);
-  f[0] = 1;
-  for (int i = 1; i <= N; i++)
-    f[i] = f[i - 1] * i % mod;
-  long long ans = 0;
-  while (T--) {
-    int n, m; cin >> n >> m;
-    ans ^= f[n] * inverse(f[n - m] * f[m] % mod) % mod;
-  }
-  cout << ans << '\n';
-}
-```
-
-
-<!-- :stopwatch: 1.6 s -->
-
----
-
-优化：注意到 $n!$ 的乘法逆元乘以 $n$ 就是 $(n-1)!$ 的乘法逆元。我们只需要算 $N!$ 的乘法逆元。
-
-
-```cpp
-int main() {
-  ios::sync_with_stdio(0);
-  cin.tie(0);
-
-  int T, N;
-  cin >> T >> N;
-  vector<long long> f(N + 1), invf(N + 1);
-  f[0] = 1;
-  for (int i = 1; i <= N; i++)
-    f[i] = f[i - 1] * i % mod;
-  invf[N] = inverse(f[N]);
-  for (int i = N; i >= 1; i--)
-    invf[i - 1] = invf[i] * i % mod;
-  long long ans = 0;
-  while (T--) {
-    int n, m;
-    cin >> n >> m;
-    ans ^= f[n] * invf[n - m] % mod * invf[m] % mod;
-  }
-  cout << ans << '\n';
-}
-```
-
-<!-- :stopwatch: 1.11 s -->
 
 
 
@@ -931,6 +936,9 @@ $$
 对于每个 $k = 1, 2, \dots, n$，计算有多少种配对方案满足：最终恰好形成 $k$ 个圈。
 
 你需要将结果对 $998244353$ 取模。
+
+$1 \le n \le 1000$。
+
 
 ---
 
