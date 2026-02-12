@@ -1,0 +1,359 @@
+.definition {
+  border: 2px solid #1976d2;
+  background-color: #e3f2fd;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.definition > *:first-child {
+  margin-top: 0;
+}
+
+.definition::before {
+  content: "定义";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #1976d2;
+  color: white;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  border-radius: 6px 0 8px 0;
+}
+
+.proposition {
+  border: 2px solid #f57c00;
+  background-color: #fff3e0;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.proposition > *:first-child {
+  margin-top: 0;
+}
+
+.proposition::before {
+  content: "命题";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #f57c00;
+  color: white;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  border-radius: 6px 0 8px 0;
+}
+
+.theorem {
+  border: 2px solid #d32f2f;
+  background-color: #ffebee;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.theorem::before {
+  content: "定理";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #d32f2f;
+  color: white;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  border-radius: 6px 0 8px 0;
+}
+
+.lemma {
+  border: 2px solid #388e3c;
+  background-color: #e8f5e9;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.lemma::before {
+  content: "引理";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #388e3c;
+  color: white;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  border-radius: 6px 0 8px 0;
+}
+
+.corollary {
+  border: 2px solid #7b1fa2;
+  background-color: #f3e5f5;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.corollary::before {
+  content: "推论";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #7b1fa2;
+  color: white;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  border-radius: 6px 0 8px 0;
+}
+
+.question {
+  border: 2px solid #673ab7;
+  background-color: #ede7f6;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.question > *:first-child {
+  margin-top: 0;
+}
+
+.question::before {
+  content: "问题";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #673ab7;
+  color: white;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  border-radius: 6px 0 8px 0;
+}
+
+.example {
+  border: 2px solid #009688;
+  background-color: #e0f2f1;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.example::before {
+  content: "例";
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  color: #009688;
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+.example::after {
+  content: "💡";
+  position: absolute;
+  top: 10px;
+  left: 35px;
+  color: #009688;
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+.remark {
+  border: 2px solid #455a64;
+  background-color: #eceff1;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.remark::before {
+  content: "注意";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #455a64;
+  color: white;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  border-radius: 6px 0 8px 0;
+}
+
+.remark::after {
+  content: "🧐";
+  position: absolute;
+  top: 10px;
+  left: 55px;
+  color: #795548;
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+.algorithm {
+    background-color: rgb(232, 245, 233);
+    position: relative;
+    font-size: 0.9em;
+    border-width: 2px;
+    border-style: solid;
+    border-color: rgb(47, 211, 85);
+    border-image: initial;
+    padding: 35px 15px 4px;
+    margin: 10px 0px 2px;
+    border-radius: 8px;
+}
+
+.algorithm::before {
+    content: "算法";
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: rgb(47, 211, 85);
+    color: rgb(255, 255, 255);
+    font-size: 0.8em;
+    padding: 2px 8px;
+    border-radius: 6px 0px 8px;
+}
+
+.topic-box {
+  border: 2px solid #ff9800;
+  background-color: #fff3e0;
+  padding: 10px 15px 0;
+  margin: 20px 0 1px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.topic {
+  border: 2px solid #ff9800;
+  background-color: #fff3e0;
+  padding: 35px 15px 4px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.topic::before {
+  content: attr(topic);
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 2px 8px;
+  background-color: #ff9800;
+  font-weight: 0.8em;
+  color: white;
+  border-radius: 6px 0 8px 0;
+}
+
+strong {
+  color: #c2185b;  /* 濃いマゼンタ色 */
+}
+
+.emph {
+  color: #c2185b;
+}
+
+.caption {
+  @apply text-center text-sm text-gray-500 mt-0;
+}
+
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+
+.proof {
+  /* A serious, academic slate gray */
+  border: 2px solid #546e7a;
+  background-color: #eceff1;
+  padding: 35px 15px 12px;
+  margin: 10px 0 2px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.proof > *:first-child {
+  margin-top: 0;
+}
+
+.proof > *:last-child {
+  margin-bottom: 0;
+}
+
+.proof::before {
+  content: "证明";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #546e7a;
+  color: white;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  border-radius: 6px 0 8px 0;
+}
+
+.toggle-box {
+    margin: 10px 0
+}
+
+.toggle-box details {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    background-color: #f9f9f9;
+    transition: all .3s ease
+}
+
+.toggle-box details[open] {
+    background-color: #f5f5f5;
+    border-color: #1976d2
+}
+
+.toggle-box details summary {
+    cursor: pointer;
+    padding: 6px;
+    font-weight: 500;
+    -webkit-user-select: none;
+    user-select: none;
+    list-style: none;
+    position: relative;
+    transition: color .2s ease
+}
+
+.toggle-box details summary::-webkit-details-marker {
+    display: none
+}
+
+.toggle-box details summary:before {
+    content: "▶";
+    display: inline-block;
+    margin-right: 8px;
+    transition: transform .3s ease;
+    color: #1976d2
+}
+
+.toggle-box details[open] summary:before {
+    transform: rotate(90deg)
+}
+
+.toggle-box details summary:hover {
+    color: #1976d2
+}
+
+.toggle-box details>div {
+    overflow: hidden;
+    animation: slideDown .3s ease-out
+}
+
+aside > :first-child {
+	margin-top: 0;
+}
+aside > :last-child {
+	margin-bottom: 0;
+}
