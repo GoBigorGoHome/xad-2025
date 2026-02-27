@@ -464,7 +464,7 @@ int main() {
   vector<Edge> e;
   for (int d = 1; d <= r; d++) {
     int t = (l + d - 1) / d;
-    int i = t * d; // i是l,l+1,...,r第一个d的倍数
+    int i = t * d; // i是l,l+1,...,r中第一个d的倍数
     for (int j = i + d; j <= r; j += d)
       e.push_back({i, j, (long long) t * j});
   }
