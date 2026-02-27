@@ -471,8 +471,8 @@ int main() {
   sort(e.begin(), e.end(), comp);
   long long ans = 0;
   for (Edge t : e)
-    if (g.unite(t.a, t.b))
-      ans += t.c;
+    if (g.unite(t.u, t.v))
+      ans += t.w;
   cout << ans << '\n';
   return 0;
 }
