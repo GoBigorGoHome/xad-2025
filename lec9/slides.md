@@ -402,20 +402,6 @@ int main() {
 
 ---
 
-# 最小公倍树
-
-[洛谷P8207](https://www.luogu.com.cn/problem/P8207)
-
-给定正整数 $L, R$。考虑完全图 $G(V, E)$。$V = \set{L, L + 1, \dots, R}$。
-
-边 $(u, v)$ 的权值是 $u, v$ 的最小公倍数 $\lcm(u, v)$。
-
-求 $G$ 的最小生成树的权值。
-
-$1 \le L \le R \le 10^6$ 且 $R - L \le 10^5$。
-
----
-
 <div class=question>
 
 设 $G$ 是一个连通的带权无向图，$(u, v)$ 是 $G$ 上的一条边，权值是 $w$。  
@@ -426,3 +412,68 @@ $1 \le L \le R \le 10^6$ 且 $R - L \le 10^5$。
 
 边 $(u, v)$ 不在 $G$ 的任何一个 MST 中当且仅当 $G$ 上存在一条连接 $u, v$ 的路径，上面的边的权值都小于 $w$。
 </div>
+
+---
+
+# 最小公倍树
+
+[洛谷P8207](https://www.luogu.com.cn/problem/P8207)
+
+给定正整数 $L, R$。集合 $V = \set{L, L + 1, \dots, R}$，考虑完全图 $G(V, E)$。
+
+边 $(u, v)$ 的权值是 $u, v$ 的最小公倍数 $\lcm(u, v)$。
+
+求 $G$ 的最小生成树的权值。
+
+$1 \le L \le R \le 10^6$ 且 $R - L \le 10^5$。
+
+---
+
+设 $L \le u < v \le R$。考虑边 $(u, v)$，它的权值是 $\lcm(u, v) = uv/\gcd(u,v)$。
+
+设 $d = \gcd(u, v)$。我们注意到
+- $u, v$ 都是 $d$ 的倍数。
+- $L, \dots, R$ 中第一个 $d$ 的倍数是 $\lceil L/d \rceil \cdot d$。把它记作 $M(d)$。  
+我们有 $M(d) \le u$，$\gcd(M(d), u) \ge d$，$\gcd(M(d), v) \ge d$。
+- 如果 $M(d) < u$，那么边 $(u, M(d))$ 和边 $(v, M(d))$ 的权值都比边 $(u, v)$ 的权值小。  
+此时边 $(u, v)$ 不可能在 MST 里。
+
+<div v-click class=proposition>
+
+最小生成树里的边 $(u, v)$ 满足 $u = M(\gcd(u, v))$。
+</div>
+
+<div v-click class=topic-box>
+
+我们需要考虑的边只有 $(M(d), kd, M(d)\cdot k)$。$d$ 取遍 $\gcd(u, v)$ 的可能值。
+
+</div>
+---
+
+```cpp
+struct Edge {
+  int u, v;
+  long long w;
+};
+
+int comp(Edge x, Edge y) { return x.w < y.w; }
+
+int main() {
+  int l, r; cin >> l >> r;
+  dsu g(r + 1);
+  vector<Edge> e;
+  for (int d = 1; d <= r; d++) {
+    int t = (l + d - 1) / d;
+    int i = t * d; // i是l,l+1,...,r第一个d的倍数
+    for (int j = i + d; j <= r; j += d)
+      e.push_back({i, j, (long long) t * j});
+  }
+  sort(e.begin(), e.end(), comp);
+  long long ans = 0;
+  for (Edge t : e)
+    if (g.unite(t.a, t.b))
+      ans += t.c;
+  cout << ans << '\n';
+  return 0;
+}
+```

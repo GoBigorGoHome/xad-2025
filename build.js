@@ -75,7 +75,7 @@ folders.forEach(folder => {
     // 3. Marp Build Command
     // --html allows raw HTML in slides, --base sets asset paths
     // 3.1. Build Marp HTML
-    execSync(`npx marp slides.md --theme lecture.css --html --output ../dist/${folder}/index.html`, { 
+    execSync(`pnpm exec marp slides.md --theme lecture.css --html --output ../dist/${folder}/index.html`, {
       cwd: projectPath, 
       stdio: 'inherit' 
     });
