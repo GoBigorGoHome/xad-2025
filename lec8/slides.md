@@ -89,7 +89,7 @@ layout: section
 如果对于所有 $T\subseteq S$ 有
 
 $$
-g(T) = \sum_{Y\supseteq T} f(Y).
+g(T) = \sum_{Y\supseteq T} f(Y),
 $$
 
 那么对于所有 $T\subseteq S$ 有
@@ -113,8 +113,8 @@ $$
 证明：
 $$
 \begin{aligned}
-\sum_{Y\supseteq T}(-1)^{|Y|-|T|} g(Y) &=   \sum_{Y\supseteq T}(-1)^{|Y|-|T|} \sum_{Z\supseteq Y} f(Z)  \quad {\color{red}交换求和次序}\\
-& = \sum_{Z\supseteq T} \left(\sum_{Z\supseteq Y\supseteq T} (-1)^{|Y|-|T|} \right) f(Z).
+\sum_{Y\supseteq T}(-1)^{|Y|-|T|} g(Y) &=   \sum_{Y\supseteq T}(-1)^{|Y|-|T|} \sum_{Z\supseteq Y} f(Z)  \\
+& = \sum_{Z\supseteq T} \left(\sum_{Z\supseteq Y\supseteq T} (-1)^{|Y|-|T|} \right) f(Z). \quad {\color{red}交换求和次序}
 \end{aligned}
 $$
 
@@ -161,8 +161,8 @@ $$
 证明：
 $$
 \begin{aligned}
-\sum_{Y\subseteq T}(-1)^{|T|-|Y|} g(Y) &=   \sum_{Y\subseteq T}(-1)^{|T|-|Y|} \sum_{Z\subseteq Y} f(Z) \quad {\color{red} 交换求和次序}\\
-& = \sum_{Z\subseteq T} \left(\sum_{Z\subseteq Y \subseteq T} (-1)^{|T|-|Y|}\right) f(Z)  \\
+\sum_{Y\subseteq T}(-1)^{|T|-|Y|} g(Y) &=   \sum_{Y\subseteq T}(-1)^{|T|-|Y|} \sum_{Z\subseteq Y} f(Z) \\
+& = \sum_{Z\subseteq T} \left(\sum_{Z\subseteq Y \subseteq T} (-1)^{|T|-|Y|}\right) f(Z)   \quad {\color{red} 交换求和次序}
 \end{aligned}
 $$
 
@@ -449,6 +449,265 @@ long long coprime_sum(int n, int m) {
 - 每一列至少有一个小方格被染色。
 - 每种颜色在棋盘上至少出现一次。
 
-求满足条件的染色方案数，模 $10^9 + 7$。
+
 
 $1 \le n, m, c \le 400$。
+
+
+---
+
+利用容斥原理，我们可以把“每种颜色在棋盘上至少出现一次”变成“只能用某 $k$ 种颜色”（$1 \le k \le c$）。
+
+现在我们来解决下述问题
+
+<div class=question>
+
+用 $k$ 种颜色染一个 $n \times m$ 的棋盘，需满足下列条件
+- 每个小方格可以染成 $k$ 种颜色中的一种，也可以不染色。
+- 每一行至少有一个小方格被染色。
+- 每一列至少有一个小方格被染色。 
+
+求满足条件的染色方案数，模 $10^9 + 7$。
+
+</div>
+
+这个问题也可以用容斥原理来解决。  
+
+---
+
+## 方法一
+
+- 取集合 $A$ 为用 $k$ 种颜色染一个 $n \times m$ 的棋盘，每个小方格可以染成 $k$ 种颜色中的一种，也可以不染色；  
+染色方案的集合。
+- 取性质集合 $S = \set{\mathrm{R}_1, \dots, \mathrm{R}_n, \mathrm{C}_1, \dots, \mathrm{C}_m}$。$\mathrm{R}_i$ 表示第 $i$ 行没被染色，$\mathrm{C}_j$ 表示第 $j$ 列没被染色。
+
+对于 $T \subseteq S$，设 $T$ 里有 $a$ 个 R 元素，$b$ 个 C 元素，那么
+$$f_{\ge}(T) = (k + 1)^{(n - a)(m - b)}.$$
+
+应用容斥原理，得
+$$
+f_{=}(\varnothing) = \sum_{\substack{0 \le a \le n \\ 0 \le b \le m }} {n \choose a} {m \choose b} (-1)^{a + b} (k + 1)^{(n - a)(m - b)}.
+$$
+
+<!-- (k + 1) 的次数，一开始我想到的是 nm - (am + bn - ab)，其实有一个更简单的式子 (n - a) (m - b)，也就是删掉不涂色的 a 个行和 b 个列 -->
+
+---
+
+```cpp
+const int mod = 1e9 + 7;
+int C[405][405];
+int power(int x, int n); //快速幂
+int main() {
+  for (int i = 0; i <= 400; i++) {
+    C[i][0] = 1;
+    for (int j = 1; j <= i; j++)
+      C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % mod;
+  }
+  int n, m, c; cin >> n >> m >> c;
+  long long ans = 0;
+  for (int k = 1; k <= c; k++) {
+    long long sum = 0;
+    for (int a = 0; a <= n; a++)
+      for (int b = 0; b <= m; b++) {
+        long long t = (long long) C[n][a] * C[m][b] % mod * power(k + 1, (n - a) * (m - b)) % mod;
+        sum += ((a + b) & 1 ? -t : t);
+      }
+    long long t = sum % mod * C[c][k] % mod;
+    ans += ((c - k) & 1 ? -t : t);
+  }
+  ans %= mod;
+  if (ans < 0) ans += mod;
+  cout << ans << '\n';
+}
+```
+
+---
+
+## 方法二
+
+- 取集合 $A$ 为用 $k$ 种颜色染一个 $n \times m$ 的棋盘，每个小方格可以染成 $k$ 种颜色中的一种，也可以不染色，并且每一列至少有一个小方格被染色；染色方案的集合。
+- 取性质集合 $S = \set{\mathrm{R}_1, \dots, \mathrm{R}_n}$。$\mathrm{R}_i$ 表示第 $i$ 行没被染色。
+
+对于 $T \subseteq S$，设 $T$ 里有 $a$ 个元素，那么
+$$f_{\ge}(T) = ((k + 1)^{n - a} - 1)^m.$$
+
+应用容斥原理，得
+$$
+f_{=}(\varnothing) = \sum_{0 \le a \le n} {n \choose a} \cdot (-1)^a \cdot ((k + 1)^{n - a} - 1)^m.
+$$
+
+---
+
+```cpp
+const int mod = 1e9 + 7;
+int C[405][405];
+int power(int x, int n);
+
+int main() {
+  for (int i = 0; i <= 400; i++) {
+    C[i][0] = 1;
+    for (int j = 1; j <= i; j++)
+      C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % mod;
+  }
+  int n, m, c;
+  cin >> n >> m >> c;
+  long long ans = 0;
+  for (int k = 1; k <= c; k++) {
+    long long sum = 0;
+    for (int a = 0; a <= n; a++) {
+      long long t = (long long) C[n][a] * power(power(k + 1, n - a) - 1, m) % mod;
+      sum += (a & 1 ? -t : t);
+    }
+    long long t = sum % mod * C[c][k] % mod;
+    ans += ((c - k) & 1 ? -t : t);
+  }
+  ans %= mod;
+  if (ans < 0) ans += mod;
+  cout << ans << '\n';
+}
+```
+
+---
+
+实际上，我们可以从方法一的式子推出方法二的式子
+
+$$
+\begin{aligned}
+&\sum_{\substack{0 \le a \le n \\ 0 \le b \le m }} {n \choose a} {m \choose b} (-1)^{a + b} (k + 1)^{(n - a)(m - b)} \\
+&= \sum_{0 \le a \le n} {n \choose a} (-1)^{a} \sum_{0 \le b \le m} {m \choose b} (-1)^{b} \left((k + 1)^{(n - a)}\right)^{(m - b)} \\
+&=  \sum_{0 \le a \le n} {n \choose a} (-1)^{a} \left((k + 1)^{(n - a)} - 1\right)^m. \quad \text{\color{red}二项式定理}
+\end{aligned}
+$$
+
+---
+
+# Kids Aren't Alright
+
+[QOJ 11725](https://qoj.ac/contest/1742/problem/11725)
+
+给定正整数 $m$。求有多少个非空的正整数集合满足其中的正整数的最大公因数是 $1$，最小公倍数是 $m$？
+
+答案模 $998244353$。$1 \le m \le 10^{18}$。
+
+---
+
+若一个集合满足 $\mathrm{LCM} = m$，那么它的元素都是 $m$ 的因数。
+
+
+令 $D(m)$ 为 $m$ 的因数构成的集合。取集合 $A$ 为 $D(m)$ 的子集构成的集合。
+
+设 $m = p_1^{a_1} p_2^{a_2} \dots p_k^{a_k}$。
+
+对于 $m$ 的每个素因子 $p_i$，考虑两个性质
+- GCD 能被 $p_i$ 整除。
+- LCM 不能被 $p_i^{a_i}$ 整除。
+
+一共 $2k$ 个性质，它们构成性质集合 $S$。
+
+我们要算的就是集合 $A$ 里有多少个元素 $X$ 不具有 $S$ 里的任何一个性质。 
+
+当我们对每个 $i$ 确定了哪些性质需要满足之后，就可以确定有多少个数可以选入集合 $X$。
+
+假设有 $t$ 个元素可以选入集合 $X$，那么非空集合 $X$ 有 $2^{t} - 1$ 个。
+
+---
+
+## $t$ 是 $k$ 个数的乘积
+
+对于素因子 $p_i$，考虑四种情况
+- GCD 能被 $p_i$ 整除。（乘以 $a_i$）
+- LCM 不能被 $p_i^{a_i}$ 整除。（乘以 $a_i$）
+- GCD 能被 $p_i$ 整除 **且** LCM 不能被 $p_i^{a_i}$ 整除。（乘以 $a_i - 1$）
+- 无要求。（乘以 $a_i + 1$）
+
+
+
+对每个 $p_i$ 要枚举四种情况，计算量是 $O(4^k)$ 而 $k \le 15$（一个不超过 $10^{18}$ 的整数 $m$ 至多有 $15$ 个素因子）。
+
+注意到上述前两种情况算出来的 $t$ 是一样的，因此对每个 $p_i$ 只需要枚举三种情况就够了。计算量是 $O(3^k)$。
+
+
+---
+
+
+
+<div class=question>
+
+给定正整数 $m \le 10^{18}$。设 $m = p_1^{a_1} p_2^{a_2} \dots p_k^{a_k}$。如何算出 $a_1, a_2, \dots, a_k$？
+
+</div>
+
+先分解出 $m$ 的不超过 $10^6$ 的素因子。此时剩下的数如果不是 $1$，那么它
+- 要么是一个素数 $p$，
+- 要么是一个素数的平方 $p^2$，
+- 要么是两个素数的乘积 $pq$。
+
+第一种情况可以用 Miller-Rabin 测试来检验。第二种情况可以通过开平方来检验。如果前两种情况都不是，那就是第三种情况。
+
+---
+
+# 素性测试
+
+<div class=question>
+
+给定大奇数 $n$，判断 $n$ 是不是素数。
+
+</div>
+
+
+<div v-click>
+
+**试除**：用每个奇数 $3, 5, 7, 9, \dots, \lfloor \sqrt{n} \rfloor$ 除 $n$。
+
+计算量 $O(\sqrt{n})$。当 $n$ 大到 $10^{18}$ 时，太慢。
+</div>
+
+---
+
+# 概率性素性测试
+
+## 整除测试
+
+<div class=topic-box>
+
+$n$ 是合数当且仅当存在奇数 $3 \le a \le \lfloor \sqrt{n} \rfloor$ 使得 $a \mid n$。
+
+</div>
+
+在 $3$ 到 $\lfloor \sqrt{n} \rfloor$ 之间随机选择一个奇数 $a$，检查 $a \mid n$。
+
+---
+
+## Fermat 测试
+
+<div class=topic-box>
+
+$n$ 是合数当且仅当存在整数 $2 \le a \le n - 2$ 使得 $a^{n-1} \ne 1 \pmod{n}$。
+
+</div>
+
+在 $2$ 到 $n-2$ 之间随机选择一个奇数 $a$，检查 $a^{n-1} \ne 1 \pmod{n}$。
+
+---
+
+
+
+
+
+<div class=proposition>
+
+设 $n$ 是奇数，$n \ge 3$。如果 $n$ 是素数，那么
+- 对每个整数 $a= 2, 3, \dots, n - 1$ 都有 $a^{n-1} = 1 \pmod{n}$。
+- 方程 $x^2 = 1 \pmod{n}$ 的解只有 $x = \pm 1 \pmod{n}$。
+
+</div>
+
+---
+
+## Miller-Rabin 测试
+
+<div class=topic-box>
+
+设 $n$ 是奇数，$n \ge 3$。设 $n - 1 = u2^{t}$，$u$ 是奇数。那么 $n$ 是合数当且仅当存在 $2 \le a \le n - 2$ 使得 $a^{u} \ne 1 \pmod{n}$ 且 $a^{u2^k} \ne -1 \pmod{n}$ for any $0 \le k < t$。
+
+</div>
