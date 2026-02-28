@@ -477,3 +477,104 @@ int main() {
   return 0;
 }
 ```
+
+---
+
+# 例题：最小生成树
+
+[JAG2013Spring E](https://atcoder.jp/contests/JAG2013Spring/tasks/icpc2013spring_e)
+<span class="mx-4" />
+[洛谷P14080](https://www.luogu.com.cn/problem/P14080) 
+
+
+给你一个有 $n$ 个点和 $m$ 条边的带权简单无向图 $G$。点从 $1$ 到 $n$ 编号。  
+边从 $1$ 到 $m$ 编号。第 $i$ 条边连接点 $a_i$ 和 $b_i$，权值是 $w_i$。
+
+令 $G_i$ 为从 $G$ 中删除第 $i$ 条边所得的图。对每个 $i$，计算 $G_i$ 的最小生成树的权值。  
+若 $G_i$ 里没有生成树，输出 $-1$。
+
+###### 限制
+
+- $2 \le n \le 10^5$
+- $1 \le m \le 2\times 10^5$
+- $0 \le w_i \le 10^6$
+
+---
+
+- 先求出图 $G$ 的一个最小生成树 $T$，其中有 $n-1$ 条边。
+
+![](./mst1.svg) 
+
+- 如果边 $i$ 不在 $T$ 里，那么 $T$ 仍是 $G_i$ 的最小生成树。
+- 问题归结为：对 $T$ 里的每一条边 $i$，计算 $G_i$ 的最小生成树的权值。
+  - 假设 $G_i$ 连通，那么树 $T$ 里除了边 $i$ 之外的 $n-2$ 条边仍在 $G_i$ 的某个最小生成树里 $T_i$。
+  - 从树 $T$ 里把边 $i$ 删除之后，得到两个连通块。
+  - $T_i$ 里用来**替换**边 $i$ 的那条边，就是没有入选 $T$ 并且能连通这两个连通块的边当中，权值最小的那一条。
+
+
+---
+layout: two-cols
+layoutClass: gap-4
+---
+
+```cpp
+const int maxn = 1e5 + 5;
+// 简易并查集
+int p[maxn];
+int find (int x) {
+  return p[x] == 0 ? x : p[x] = find(p[x]);
+}
+vector<pair<int,int>> g[maxn];
+int depth[maxn], pe[maxn], pv[maxn];
+void dfs(int u, int p, int e) {
+  depth[u] = depth[p] + 1;
+  pe[u] = e; pv[u] = p;
+  for (auto [v, id] : g[u])
+    if (v != p)
+      dfs(v, u, id);
+}
+
+int main() {
+  int n, m; cin >> n >> m;
+  vector<int> u(m), v(m), w(m);
+  for (int i = 0; i < m; i++)
+    cin >> u[i] >> v[i] >> w[i];
+  vector<int> id(m);
+  iota(id.begin(), id.end(), 0);
+  sort(id.begin(), id.end(), 
+    [&](int i, int j) { return w[i] < w[j]; });
+  vector<bool> used(m);
+  long long sum = 0;
+```
+
+::right::
+
+```cpp {*}{startLine:28}
+  for (int i : id) {
+    int x = find(u[i]), y = find(v[i]);
+    if (x != y) {
+      p[x] = y;
+      used[i] = true; sum += w[i];
+      g[u[i]].push_back({v[i], i});
+      g[v[i]].push_back({u[i], i});
+    }
+  }
+  dfs(1, 0, -1);
+  vector<long long> ans(m, -1);
+  fill(p + 1, p + n + 1, 0);
+  for (int i : id)
+    if (!used[i]) {
+      ans[i] = sum;
+      int x = find(u[i]), y = find(v[i]);
+      while (x != y) {
+        if (depth[x] < depth[y])
+          swap(x, y);
+        int j = pe[x];
+        ans[j] = sum + w[i] - w[j]; // 用边i替换边j
+        x = p[x] = find(pv[x]); // x 向上跳一步
+      }
+    }
+  for (long long x : ans)
+      cout << x << '\n';
+}
+```
