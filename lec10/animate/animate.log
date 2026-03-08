@@ -1,0 +1,369 @@
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.12.2)  11 DEC 2024 20:05
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**animate.tex
+(./animate.tex
+LaTeX2e <2024-11-01> patch level 1
+L3 programming layer <2024-11-02>
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/standalone/standalone.cls
+Document Class: standalone 2022/10/10 v1.3b Class to compile TeX sub-files stan
+dalone
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/tools/shellesc.sty
+Package: shellesc 2023/07/08 v1.0d unified shell escape interface for LaTeX
+Package shellesc Info: Restricted shell escape enabled on input line 77.
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/iftex/ifluatex.sty
+Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
+
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2022/02/03 v1.0f TeX engine tests
+))
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+Package: xkeyval 2022/06/16 v2.9 package option processing (HA)
+
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+\XKV@toks=\toks17
+\XKV@tempa@toks=\toks18
+
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/xkeyval/keyval.tex))
+\XKV@depth=\count192
+File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
+))
+\sa@internal=\count193
+\c@sapage=\count194
+
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/standalone/standalone.cfg
+File: standalone.cfg 2022/10/10 v1.3b Default configuration file for 'standalon
+e' class
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2024/06/29 v1.4n Standard LaTeX document class
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2024/06/29 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count195
+\c@section=\count196
+\c@subsection=\count197
+\c@subsubsection=\count198
+\c@paragraph=\count199
+\c@subparagraph=\count266
+\c@figure=\count267
+\c@table=\count268
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen141
+)
+\sa@box=\box52
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: xetex.def on input line 106.
+
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/graphics-def/xetex.def
+File: xetex.def 2022/09/22 v5.0n Graphics/color driver for xetex
+))
+\Gin@req@height=\dimen142
+\Gin@req@width=\dimen143
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/animate/animate.sty
+Package: animate 2024/10/14 PDF & SVG animations from files and inline graphics
+
+
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/oberdiek/ifdraft.sty
+Package: ifdraft 2016/05/16 v1.4 Detect class options draft and final (HO)
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/tools/calc.sty
+Package: calc 2023/07/08 v4.3 Infix arithmetic (KKT,FJ)
+\calc@Acount=\count269
+\calc@Bcount=\count270
+\calc@Adimen=\dimen144
+\calc@Bdimen=\dimen145
+\calc@Askip=\skip51
+\calc@Bskip=\skip52
+LaTeX Info: Redefining \setlength on input line 80.
+LaTeX Info: Redefining \addtolength on input line 81.
+\calc@Ccount=\count271
+\calc@Cskip=\skip53
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/media9/pdfbase.sty
+Package: pdfbase 2024/09/16 v0.59 driver independent access to low-level PDF fe
+atures
+
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/l3backend/l3backend-xetex.def
+File: l3backend-xetex.def 2024-05-08 L3 backend support: XeTeX
+\g__graphics_track_int=\count272
+\l__pdf_internal_box=\box53
+\g__pdf_backend_annotation_int=\count273
+\g__pdf_backend_link_int=\count274
+)
+\g_pbs_page_int=\count275
+\g_pbs_obj_int=\count276
+\g_pbs_oc_int=\count277
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/zref/zref-abspage.sty
+Package: zref-abspage 2023-09-14 v2.35 Module abspage for zref (HO)
+
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/zref/zref-base.sty
+Package: zref-base 2023-09-14 v2.35 Module base for zref (HO)
+
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
+)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode not found.
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/generic/etexcmds/etexcmds.sty
+Package: etexcmds 2019/12/15 v1.7 Avoid name clashes with e-TeX commands (HO)
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/auxhook/auxhook.sty
+Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
+)
+Package zref Info: New property list: main on input line 767.
+Package zref Info: New property: default on input line 768.
+Package zref Info: New property: page on input line 769.
+)
+\c@abspage=\count278
+Package zref Info: New property: abspage on input line 67.
+)
+(/home/zjs/texlive/2024/texmf-dist/tex/latex/ocgx2/ocgbase.sty
+Package: ocgbase 2024/09/15 v0.24 support package for ocgx2.sty
+)
+\@anim@box=\box54
+\@anim@measbox=\box55
+\@anim@tmpdima=\dimen146
+\@anim@tmpdimb=\dimen147
+\@anim@num=\count279
+\@anim@curframe=\count280
+\@anim@curframe@zb=\count281
+\@anim@resizeflags=\count282
+\@anim@skipfram=\count283
+\@anim@mulframecnt=\count284
+\@anim@@tmlnfile=\read2
+\@anim@tmpcnt=\count285
+\c@@anim@ltxcnt=\count286
+\@anim@curlayer=\count287
+\@anim@lineno=\count288
+\@anim@curfield=\count289
+\@anim@@resizeflags=\count290
+) (./animate.aux)
+\openout1 = `animate.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 5.
+LaTeX Font Info:    ... okay on input line 5.
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 1>
+ <a0,fr0>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 2>
+ <a0,fr1>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 3>
+ <a0,fr2>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 4>
+ <a0,fr3>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 5>
+ <a0,fr4>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 6>
+ <a0,fr5>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 7>
+ <a0,fr6>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 8>
+ <a0,fr7>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 9>
+
+<a0,fr8>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 10>
+ <a0,fr9>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 11>
+ <a0,fr10>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 12>
+ <a0,fr11>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 13>
+ <a0,fr12>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 14>
+ <a0,fr13>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 15>
+ <a0,fr14>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 16>
+ <a0,fr15>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 17>
+
+<a0,fr16>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 18>
+ <a0,fr17>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 19>
+ <a0,fr18>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 20>
+ <a0,fr19>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 21>
+ <a0,fr20>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 22>
+ <a0,fr21>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 23>
+ <a0,fr22>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 24>
+
+<a0,fr23>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 25>
+ <a0,fr24>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 26>
+ <a0,fr25>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 27>
+ <a0,fr26>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 28>
+ <a0,fr27>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 29>
+ <a0,fr28>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 30>
+ <a0,fr29>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 31>
+
+<a0,fr30>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 32>
+ <a0,fr31>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 33>
+ <a0,fr32>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 34>
+ <a0,fr33>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 35>
+ <a0,fr34>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 36>
+ <a0,fr35>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 37>
+ <a0,fr36>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 38>
+
+<a0,fr37>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 39>
+ <a0,fr38>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 40>
+ <a0,fr39>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 41>
+ <a0,fr40>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 42>
+ <a0,fr41>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 43>
+ <a0,fr42>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 44>
+ <a0,fr43>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 45>
+
+<a0,fr44>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 46>
+ <a0,fr45>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 47>
+ <a0,fr46>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 48>
+ <a0,fr47>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 49>
+ <a0,fr48>
+File: dfs.pdf Graphic file (type pdf)
+<use dfs.pdf, page 50>
+ <a0,fr49>
+
+[1
+
+] (./animate.aux)
+ ***********
+LaTeX2e <2024-11-01> patch level 1
+L3 programming layer <2024-11-02>
+ ***********
+ ) 
+Here is how much of TeX's memory you used:
+ 3518 strings out of 473965
+ 68862 string characters out of 5733442
+ 495449 words of memory out of 5000000
+ 26443 multiletter control sequences out of 15000+600000
+ 558077 words of font info for 37 fonts, out of 8000000 for 9000
+ 1348 hyphenation exceptions out of 8191
+ 73i,8n,80p,207b,284s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+Output written on animate.pdf (1 page).
