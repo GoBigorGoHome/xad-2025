@@ -18,6 +18,7 @@ transition: slide-left
 # enable Comark Syntax: https://comark.dev/syntax/markdown
 comark: true
 colorSchema: light
+lineNumbers: true
 ---
 
 # 欧拉回路
@@ -167,12 +168,10 @@ int find_eulerian_path(int n, int m) {
   for (int i = 0; i < n; i++) {
     if (g[i].size() & 1) {
       odd++;
-      if (s == -1)
-        s = i;
+      if (s == -1) s = i;
     }
   }
-  if (odd > 2)
-    return -1;
+  if (odd > 2) return -1;
   if (s == -1) {
     s = 0;
     while (s < n && g[s].empty())
@@ -181,25 +180,22 @@ int find_eulerian_path(int n, int m) {
       return 0;
   }
   // 找欧拉路
-  for (int i = 0; i < m; i++)
-    used[i] = false;
-  for (int i = 0; i < n; i++)
-    ptr[i] = 0;
+  for (int i = 0; i < m; i++) used[i] = false;
+  for (int i = 0; i < n; i++) ptr[i] = 0;
   write_ptr = m;
   find(s);
-
-  if (write_ptr != 0) {
-    // 不是每条边都走过
+  if (write_ptr != 0) // 不是每条边都走过
     return -1;
-  }
   return s;
 }
 ```
 
 ---
+layout: two-cols
+layoutClass: gap-4
+---
 
-
-
+写法一：
 ```cpp
 void find(int u) {
   while (ptr[u] < (int) g[u].size()) {
@@ -215,10 +211,10 @@ void find(int u) {
 }
 ```
 
----
+::right::
 
 
-另一种写法：
+写法二：
 
 ```cpp
 void find(int u) {
@@ -235,6 +231,9 @@ void find(int u) {
 }
 ```
 
+---
+layout: two-cols
+layoutClass: gap-4
 ---
 
 ```cpp
@@ -256,6 +255,10 @@ int main() {
       g[v].push_back(i);
     }
     int s = find_eulerian_path(n, m);
+```
+::right::
+
+```cpp {*}{startLine:19}
     // 输出答案
     if (s == -1)
       cout << "No\n";
@@ -299,7 +302,9 @@ int ptr[maxn];
 ```
 
 ---
-
+layout: two-cols
+layoutClass: gap-4
+---
 
 
 
@@ -333,12 +338,11 @@ int find_eulerian_path(int n, int m) {
 ```
 
 
----
+::right::
 
-```cpp
+```cpp {*}{startLine:26}
   int v = s;
-  int l = 0;
-  int r = m;
+  int l = 0, r = m;
   while (1) {
     // 当前所在的点还有边没走过吗？
     bool found = false;
@@ -360,11 +364,8 @@ int find_eulerian_path(int n, int m) {
       v ^= e[id].from ^ e[id].to;// 后退一步
     }
   }
-  if (r != 0)
-    return -1;
-  return s;
+  return r != 0 ? -1 : s;
 }
 ```
 
-main 函数和递归写法相同。
 
