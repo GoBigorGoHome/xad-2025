@@ -501,7 +501,7 @@ void dfs(int u) {
 
 # 空间优化：省去 dfn 数组
 
-以 $2, 4, 6, 8, \dots$ 作为 DFS 序，当发现点 $v$ 的 low 值变小时，就把新的 low 值的二进制最低位设置为 1。
+以 $2, 4, 6, 8, \dots$ 作为 DFS 序，当发现点 $u$ 的 low 值变小时，就把新的 low 值的二进制最低位设置为 1。
 
 ```cpp
 void dfs(int u) {
