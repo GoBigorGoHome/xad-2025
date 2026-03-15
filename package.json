@@ -4,7 +4,7 @@
     "preview": "wrangler pages dev dist"
   },
   "devDependencies": {
-    "@marp-team/marp-cli": "^4.2.3",
-    "wrangler": "^4.60.0"
+    "@marp-team/marp-cli": "^4.3.0",
+    "wrangler": "^4.73.0"
   }
 }
