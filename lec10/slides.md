@@ -224,7 +224,7 @@ bool test_bipart(int n) {
 
 设 $G$ 是图，$v$ 是 $G$ 上一顶点，$e$ 是 $G$ 上一条边。若从图 $G$ 里删除点 $v$ 之后，连通块的数量增加，则 $v$ 是 $G$ 的<ruby>**割点**<rt>cutvertex</rt></ruby>。若从图 $G$ 里删除边 $e$ 后，连通块的数量增加，则 $e$ 是 $G$ 的<ruby>**桥**<rt>bridge</rt></ruby>。桥也称**割边**。
 
-![](../4_1/cutvertex_bridge.png)
+![](cutvertex_bridge.png)
 此图有割点 $v, x, y, w$ 和桥 $e = xy$。
 
 ---
