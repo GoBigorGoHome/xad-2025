@@ -30,15 +30,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # - name: Restore Dist Cache
-      #   uses: actions/cache@v5
-      #   with:
-      #     path: dist
-      #     # We use a static key so it always tries to find the most recent dist
-      #     key: ${{ runner.os }}-dist-cache-${{ github.run_id }}
-      #     # This is the "magic" part: it finds the most recent cache starting with this prefix
-      #     restore-keys: |
-      #       ${{ runner.os }}-dist-cache-
+      - name: Restore Dist Cache
+        uses: actions/cache@v5
+        with:
+          path: dist
+          # We use a static key so it always tries to find the most recent dist
+          key: ${{ runner.os }}-dist-cache-${{ github.run_id }}
+          # This is the "magic" part: it finds the most recent cache starting with this prefix
+          restore-keys: |
+            ${{ runner.os }}-dist-cache-
 
       - name: Build project
         run: pnpm run build # This runs your build.js
