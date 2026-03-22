@@ -5,8 +5,6 @@ const path = require('path');
 const distDir = path.join(__dirname, 'dist');
 const projectsDir = __dirname;
 
-if (fs.existsSync(distDir)) fs.rmSync(distDir, { recursive: true });
-fs.mkdirSync(distDir);
 
 // Helper: Get last commit date for the slides.md file
 function getLastUpdated(folder, fileName) {
@@ -19,15 +17,21 @@ function getLastUpdated(folder, fileName) {
   }
 }
 
-// 1. Get folders with slides.md
-const folders = fs.readdirSync(projectsDir).filter(file => {
-  const fullPath = path.join(projectsDir, file);
-  return fs.statSync(fullPath).isDirectory() && 
-         fs.existsSync(path.join(fullPath, 'slides.md')) &&
-         !['node_modules', 'dist', '.git'].includes(file);
-});
-
-const manifest = [];
+function hasFileChanged(filePath) {
+  try {
+    // --name-only: just give the filename
+    // HEAD~1 HEAD: compare previous commit with current
+    const result = execSync(`git diff --name-only HEAD~1 HEAD -- ${filePath}`)
+      .toString()
+      .trim();
+    
+    // If result is not empty, the file changed
+    return result.length > 0;
+  } catch (error) {
+    // If this is the first commit or git fails, assume it changed
+    return true; 
+  }
+}
 
 function copyImagesRecursive(src, dest, filter) {
   if (!fs.existsSync(src)) return;
@@ -53,6 +57,23 @@ function copyImagesRecursive(src, dest, filter) {
   });
 }
 
+
+// The build process
+
+if (!fs.existsSync(distDir)) {
+  fs.mkdirSync(distDir);
+}
+
+// 1. Get folders with slides.md
+const folders = fs.readdirSync(projectsDir).filter(file => {
+  const fullPath = path.join(projectsDir, file);
+  return fs.statSync(fullPath).isDirectory() && 
+         fs.existsSync(path.join(fullPath, 'slides.md')) &&
+         !['node_modules', 'dist', '.git'].includes(file);
+});
+
+const manifest = [];
+
 folders.forEach(folder => {
   const projectPath = path.join(projectsDir, folder);
   const slidesPath = path.join(projectPath, 'slides.md');
@@ -68,41 +89,43 @@ folders.forEach(folder => {
   const displayTitle = titleMatch ? titleMatch[1] : folder.replace(/-/g, ' ');
   const updatedDate = getLastUpdated(projectPath, 'slides.md');
 
-  console.log(`\n🚀 Building ${isMarp ? '[Marp]' : '[Slidev]'}: ${displayTitle}`);
-  fs.mkdirSync(distSubDir, { recursive: true });
+  if (hasFileChanged(slidesPath)) {
+    console.log(`\n🚀 Building ${isMarp ? '[Marp]' : '[Slidev]'}: ${displayTitle}`);
+    fs.mkdirSync(distSubDir, { recursive: true });
 
-  if (isMarp) {
-    // 3. Marp Build Command
-    // --html allows raw HTML in slides, --base sets asset paths
-    // 3.1. Build Marp HTML
-    execSync(`pnpm exec marp slides.md --theme lecture.css --html --output ../dist/${folder}/index.html`, {
-      cwd: projectPath, 
-      stdio: 'inherit' 
-    });
+    if (isMarp) {
+      // 3. Marp Build Command
+      // --html allows raw HTML in slides, --base sets asset paths
+      // 3.1. Build Marp HTML
+      execSync(`pnpm exec marp slides.md --theme lecture.css --html --output ../dist/${folder}/index.html`, {
+        cwd: projectPath, 
+        stdio: 'inherit' 
+      });
 
-    // 3.2. Copy ONLY images to dist
-    const imageExtensions = /\.(png|jpe?g|gif|svg|webp|avif)$/i;
+      // 3.2. Copy ONLY images to dist
+      const imageExtensions = /\.(png|jpe?g|gif|svg|webp|avif)$/i;
 
-    fs.readdirSync(projectPath).forEach(file => {
-      const srcPath = path.join(projectPath, file);
-      const destPath = path.join(distSubDir, file);
+      fs.readdirSync(projectPath).forEach(file => {
+        const srcPath = path.join(projectPath, file);
+        const destPath = path.join(distSubDir, file);
 
-      // Check if it's a file and matches our image extensions
-      if (fs.statSync(srcPath).isFile() && imageExtensions.test(file)) {
-        fs.copyFileSync(srcPath, destPath);
-        console.log(`  📸 Copied image: ${file}`);
-      } 
-      // If you have images in subfolders, we handle them recursively
-      else if (fs.statSync(srcPath).isDirectory() && file !== 'node_modules' && !file.startsWith('.')) {
-        copyImagesRecursive(srcPath, destPath, imageExtensions);
-      }
-    });
-  } else {
-    // 4. Slidev Build Command
-    execSync(`pnpm exec slidev build slides.md --base /${folder}/ --out ../dist/${folder}`, { 
-      cwd: projectPath, 
-      stdio: 'inherit' 
-    });
+        // Check if it's a file and matches our image extensions
+        if (fs.statSync(srcPath).isFile() && imageExtensions.test(file)) {
+          fs.copyFileSync(srcPath, destPath);
+          console.log(`  📸 Copied image: ${file}`);
+        } 
+        // If you have images in subfolders, we handle them recursively
+        else if (fs.statSync(srcPath).isDirectory() && file !== 'node_modules' && !file.startsWith('.')) {
+          copyImagesRecursive(srcPath, destPath, imageExtensions);
+        }
+      });
+    } else {
+      // 4. Slidev Build Command
+      execSync(`pnpm exec slidev build slides.md --base /${folder}/ --out ../dist/${folder}`, { 
+        cwd: projectPath, 
+        stdio: 'inherit' 
+      });
+    }
   }
 
   manifest.push({ title: displayTitle, date: updatedDate, path: `/${encodeURIComponent(folder)}/` });
