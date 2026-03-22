@@ -577,7 +577,7 @@ int main() {
 
 ![center h:400](segtree_range_add.svg)
 
-被区间 $[3, 6)$ 部分覆盖的块 $\color{red}i$ 上的整体加**标记** `add[i]` 需要下传。
+被区间 $[3, 7)$ 部分覆盖的块 $\color{red}i$ 上的整体加标记 `add[i]` 需要下传。
 这样的块是哪些？
 
 ---
@@ -586,7 +586,7 @@ int main() {
 
 ![center h:400](lazy_tag_push.svg)
 
-被区间 $[3, 6)$ 部分覆盖的块 $\color{red}i$ 上的整体加**标记** `add[i]` 需要下传。
+被区间 $[3, 7)$ 部分覆盖的块 $\color{red}i$ 上的整体加标记 `add[i]` 需要下传。
 这样的块是
 - $\color{red} 13$ 的那些**不全在自己右边**的祖先，即 $\color{red}6$ 和 $\color{red} 3$。
 - $\color{red} 17$ 的那些**不全在自己右边**的祖先，即 $\color{red}8$ 和 $\color{red} 4$。
@@ -636,7 +636,7 @@ int main() {
 
     for (int i = 0; i < n; i++)
         cin >> sum[i + n];
-    for (int i = n - 1; i >= 0; i--)
+    for (int i = n - 1; i > 0; i--)
         sum[i] = sum[2 * i] + sum[2 * i + 1];
 
     int LOG = bit_width((unsigned) n);
