@@ -59,7 +59,6 @@ function copyImagesRecursive(src, dest, filter) {
 
 
 // The build process
-const force_full_build = !fs.existsSync(distDir);
 
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir);
@@ -90,7 +89,7 @@ folders.forEach(folder => {
   const displayTitle = titleMatch ? titleMatch[1] : folder.replace(/-/g, ' ');
   const updatedDate = getLastUpdated(projectPath, 'slides.md');
 
-  if (force_full_build || hasFileChanged(slidesPath)) {
+  if (!fs.existsSync(distSubDir) || hasFileChanged(slidesPath)) {
     console.log(`\n🚀 Building ${isMarp ? '[Marp]' : '[Slidev]'}: ${displayTitle}`);
     fs.mkdirSync(distSubDir, { recursive: true });
 
