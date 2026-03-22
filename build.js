@@ -57,6 +57,22 @@ function copyImagesRecursive(src, dest, filter) {
   });
 }
 
+function getFolders() {
+  // 1. Get folders with slides.md
+  const folders = fs.readdirSync(projectsDir).filter(file => {
+    const fullPath = path.join(projectsDir, file);
+    return fs.statSync(fullPath).isDirectory() &&
+          fs.existsSync(path.join(fullPath, 'slides.md')) &&
+          !['node_modules', 'dist', '.git'].includes(file);
+  });
+
+  // 2. Sort them numerically, then reverse for "Large to Small"
+  folders.sort((a, b) => {
+    return b.localeCompare(a, undefined, { numeric: true, sensitivity: 'base' });
+  });
+
+  return folders;
+}
 
 // The build process
 
@@ -64,13 +80,7 @@ if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir);
 }
 
-// 1. Get folders with slides.md
-const folders = fs.readdirSync(projectsDir).filter(file => {
-  const fullPath = path.join(projectsDir, file);
-  return fs.statSync(fullPath).isDirectory() && 
-         fs.existsSync(path.join(fullPath, 'slides.md')) &&
-         !['node_modules', 'dist', '.git'].includes(file);
-});
+const folders = getFolders();
 
 const manifest = [];
 
