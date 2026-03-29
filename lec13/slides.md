@@ -10,6 +10,12 @@ title: 从分块到线段树
 
 ## 在线处理区间询问
 
+<div>
+
+
+$\newcommand{\red}[1]{{\color{red}#1}}$
+
+</div>
 
 ---
 
@@ -148,6 +154,15 @@ int main() {
 ![h:500](segtree_add_4.svg)
 
 ---
+
+# 给 $a_1$ 到 $a_7$ 加 $3$
+
+![h:400](segtree_add_4.svg)
+
+对于区间 $[1, 8)$ 来说，$\red{11}$、$\red{8}$、$\red{3}$ 是整块，但是它们的父节点不是整块（而是边块），我们把这样的整块称为**极大整块**。
+
+---
+
 
 <div class=columns>
 
@@ -547,9 +562,9 @@ int main() {
 
 ![center h:400](segtree_range_add_range_sum.svg)
 
-对于每个块 $\color{red}i$，维护两个值
-- 块 $\color{red}i$ 被整体加的数的总和 `add[i]`。
-- 块 $\color{red}i$ 里的数之和 `sum[i]`。
+对于每个块 $\color{red}i$，维护两个数据
+- **标记**：块 $\color{red}i$ 被整体加的数的总和 `add[i]`。
+- **值**：块 $\color{red}i$ 里的数之和 `sum[i]`。
 
 ---
 
@@ -557,44 +572,35 @@ int main() {
 
 ![center h:400](segtree_range_add.svg)
 
-1. 对于被区间 $[1,8)$ **部分覆盖**的块 $\color{red}j$，也就是 $\color{red} 5$ 和 $\color{red} 4$，**下传它的标记** `add[j]`。
-2. 对于被区间 $[1,8)$ **完全覆盖**的**极大的块** $\color{red}i$，更新 `add[i]` 和 `sum[i]`。
-块 $\color{red}i$ 极大是说，块 $\color{red}i$ 被完全覆盖，而它的父节点没被完全覆盖。
-3. 对于被区间 $[1,8)$ **部分覆盖**的块 $\color{red}j$，更新 `sum[j]`。
+1. 按从上到下的顺序，下传边块（$\color{red} 5$ 和 $\color{red} 4$）的标记 `add[j]`。
+2. 更新极大整块（$\red{11}$、$\red{8}$、$\red{3}$）的标记和值。
+3. 按从下到上的顺序，更新边块的标志和值。
 
----
-
-## 查询 $a_3$ 到 $a_6$ 的和
-
-![center h:400](segtree_range_add.svg)
 
 
 
 ---
 
-
-## 查询 $a_3$ 到 $a_6$ 的和
-
-![center h:400](segtree_range_add.svg)
-
-被区间 $[3, 7)$ 部分覆盖的块 $\color{red}i$ 上的整体加标记 `add[i]` 需要下传。
-这样的块是哪些？
-
----
 
 ## 查询 $a_3$ 到 $a_6$ 的和
 
 ![center h:400](lazy_tag_push.svg)
 
-被区间 $[3, 7)$ 部分覆盖的块 $\color{red}i$ 上的整体加标记 `add[i]` 需要下传。
-这样的块是
+1. 按从上到下的顺序，下传边块（$\red{3}$、$\red{4}$、$\red{6}$，$\red{8}$）的标记。
+2. 查询极大整块（$\red{13}$、$\red{16}$、$\red{7}$）的值。
+
+---
+
+# 找边块
+
+![center h:400](lazy_tag_push.svg)
+
+对于区间 $[3, 7)$ 来说，边块是
 - $\color{red} 13$ 的那些**不全在自己右边**的祖先，即 $\color{red}6$ 和 $\color{red} 3$。
 - $\color{red} 17$ 的那些**不全在自己右边**的祖先，即 $\color{red}8$ 和 $\color{red} 4$。
 
 
 ---
-
-## 查询 $a_3$ 到 $a_6$ 的和
 
 ![center h:400](lazy_tag_push.svg)
 
@@ -615,10 +621,14 @@ int main() {
 
 # 线段树有多少层
 
-![center h:400](levels_of_segtree.svg)
+![center h:360](levels_of_segtree.svg)
 
-- 长为 $n$ 的序列的线段树有 $\lfloor\log_2 n\rfloor + 1$ 层。
+- 长为 $n$ 的序列的线段树有 $\lfloor\log_2 n\rfloor + 1$ 层。如果不算最后一层，有 $\lfloor\log_2 n\rfloor$ 层。
 - 最上面那一层可能用不到。
+- $\lfloor\log_2 n\rfloor + 1$ 是正整数 $n$ 的二进制写法的位数。计算方法
+    - `32 - __builtin_clz(n)`    $\qquad$ clz：count leading zero
+    - `bit_width((unsigned) n)` since C++20
+
 
 ----
 
@@ -932,4 +942,598 @@ int main() {
     }
 }
 ```
+
+---
+
+# 数列分块入门 7
+
+给你一个长为 $n$ 的整数序列 $a = (a_1, \dots, a_n)$。处理 $n$ 个操作，操作有三类：
+
+- `0 l r c`：把 $a_l, \dots, a_r$ 每个都加 $c$。
+- `1 l r c`：把 $a_l, \dots, a_r$ 每个都乘 $c$。
+- `1 l r c`：询问 $a_r$ 的值模 $10007$（忽略 $l$ 和 $c$）。
+
+###### 限制
+
+- $1 \le n \le 3\times 10^5$
+- $a_i$，$c$ 在 int 范围内。
+
+---
+
+## 分块
+
+取 $B = \lfloor\sqrt{n}\rfloor$。
+
+对每个块 $\red{i}$，我们维护
+- **标记**：对它的整体修改操作 `tag[i]`。
+
+`tag[i]` = $(x, y)$，表示对块 $\red{i}$ 里的每个数先乘以 $x$，再加上 $y$。
+
+整体加 $c$ 可表示为 $(1, c)$，整体乘 $c$ 可表示为 $(c, 0)$。
+
+先做 $(x_1, y_1)$ 再做 $(x_2, y_2)$，合起来可表示为 $(x_2 x_1, x_2 y_1 + y_2)$。
+这叫作操作的**复合**或**合成**。
+
+
+另外我们维护一个数组 `a`，表示序列 $a$，但不需要实时更新。
+
+---
+
+## 区间修改
+
+对于整块 $\red{i}$，更新 `tag[i]`。
+
+对于边块 $\red{i}$，把 `tag[i]` 下传的数组 `a`，然后逐个修改当前块内涉及的元素。
+
+## 单点查询
+
+把 `tag[i / B]` 对作用到 `a[i]`，就得到当前的 $a_i$。
+
+
+---
+
+<div class=columns>
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    const int mod = 10007;
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+        a[i] %= mod;
+        if (a[i] < 0) a[i] += mod;
+    }
+    struct F {
+        int mul = 1;
+        int add = 0;
+    };
+
+    int B = (int) sqrt(n);
+    int NB = (n + B - 1) / B;
+    vector<F> lz(NB); // lz 是 lazy 的简写
+
+
+    auto push = [&](int ib) {
+        for (int i = ib * B; i < min(n, (ib + 1) * B); i++)
+            a[i] = (a[i] * lz[ib].mul + lz[ib].add) % mod;
+        lz[ib] = {1, 0};
+    };
+
+    int q = n;
+```
+
+```cpp
+    while (q--) {
+        int type, l, r, c;
+        cin >> type >> l >> r >> c;
+        if (type == 2) {
+            r--;
+            int i = r / B;
+            cout << (a[r] * lz[i].mul + lz[i].add) % mod << '\n';
+        } else {
+            l--;
+            int lb = (l + B - 1) / B;
+            int rb = r / B;
+            c %= mod;
+            if (c < 0) c += mod;
+            F f;
+            if (type == 0) f = {1, c};
+            else f = {c, 0};
+            if (lb > rb) {
+                push(lb - 1);
+                for (int i = l; i < r; i++) {
+                    a[i] = (a[i] * f.mul + f.add) % mod;
+                }
+            } else {
+                if (l < lb * B) {
+                    push(lb - 1);
+                    for (int i = l; i < lb * B; i++)
+                        a[i] = (a[i] * f.mul + f.add) % mod;
+                }
+                if (rb * B < r) {
+                    push(rb);
+                    for (int i = rb * B; i < r; i++)
+                        a[i] = (a[i] * f.mul + f.add) % mod;
+                }
+                for (int i = lb; i < rb; i++) {
+                    lz[i].mul = (lz[i].mul * f.mul) % mod;
+                    lz[i].add = (lz[i].add * f.mul + f.add) % mod;
+                }
+            }
+        }
+    }
+}
+```
+
+---
+
+# 用线段树处理「区间修改，单点查询」
+
+《数列分块入门 1》是「区间加，单点查询」，这题的修改操作和区间加的区别在于：
+- 加是不讲顺序的而先乘再加是讲顺序的。
+
+例如，“先加 3 再乘 2” 和“先乘 2 再加 3”是不一样的。
+> $(1, 3)$ 与 $(2, 0)$ 复合的结果是 $(2, 6)$，而 $(2, 0)$ 与 $(1, 3)$ 复合的结果是 $(2, 3)$。
+
+我们把不讲顺序的操作称为**可交换的**，讲顺序的操作称为**不可交换的**。
+
+---
+
+## 区间修改
+
+
+1. 按从上往下的顺序下传边块的标记。
+2. 把当前操作作用在极大整块上：更新它的标记。
+
+## 单点查询
+
+按**从下到上**的顺序把 $a_i$ 所属的块的标记作用在 $a_i$ 的初始值上，结果就是 $a_i$ 的当前值。
+
+---
+
+<div class=columns>
+
+```cpp
+struct F { 
+    int mul = 1;
+    int add = 0;
+};
+
+F composite(F x, F y) { // 先 y 后 x
+    return {x.mul * y.mul % mod, (x.mul * y.add + x.add) % mod};
+};
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    int n; cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+        a[i] %= mod;
+    }
+
+    vector<F> lz(2 * n);
+
+    auto apply = [&](int i, F f) {
+        lz[i] = composite(f, lz[i]);
+    };
+    auto push = [&](int i) { // 下传标记
+        apply(2 * i, lz[i]);
+        apply(2 * i + 1, lz[i]);
+        lz[i] = {1, 0};
+    };
+
+    int LOG = 31 - __builtin_clz(n); // log2(n) 向下取整
+    int q = n;
+```
+
+
+```cpp
+    while (q--) {
+        int type, l, r, c;
+        cin >> type >> l >> r >> c;
+        if (type == 2) {
+            int v = a[r - 1];
+            int p = r - 1 + n;
+            while (p > 0) {
+                v = (lz[p].mul * v + lz[p].add) % mod;
+                p /= 2;
+            }
+            if (v < 0) v += mod;
+            cout << v << '\n';
+        } else {
+            c %= mod;
+            F f;
+            if (type == 0) f = {1, c};
+            else f = {c, 0};
+            l--;
+            l += n; r += n;
+            for (int i = LOG; i >= 1; i--) {
+                if (l >> i << i != l)
+                    push(l >> i);
+                if (r >> i << i != r)
+                    push(r >> i);
+            }
+            while (l < r) {
+                if (l & 1) apply(l++, f);
+                if (r & 1) apply(--r, f);
+                l /= 2; r /= 2;
+            }
+        }
+    }
+}
+```
+
+---
+
+# 数列分块入门 8
+
+
+给你一个长为 $n$ 的整数序列 $a = (a_1, \dots, a_n)$。处理 $n$ 个操作
+- `l r c`：先输出 $a_l, \dots, a_r$ 中有多少个 $c$，然后把 $a_l, \dots, a_r$ 都改为 $c$。
+
+###### 限制
+
+- $1 \le n \le 3 \times 10^5$
+- $a_i$，$c$ 在 int 范围内。
+
+---
+
+## 分块
+
+取 $B = \lfloor\sqrt{n}\rfloor$。
+
+对每个块 $\red{i}$，维护两个值
+- `mark[i]`：bool 值，块 $\red{i}$ 最近一次经历的整体赋值有没有下传。
+- `val[i]`：当 `mark[i]` 为 `true` 时，它表示块 $\red{i}$ 被整体赋的值。
+
+
+---
+
+## 区间操作
+
+- 对于边块 $\red{i}$，先下传标记，然后逐个检查、修改涉及的项。
+- 对于整块 $\red{i}$，如果它有标记，看 `val[i]` 是否等于 $c$，然后把 `val[i]` 改为 $c$；如果它没有标记，逐个检查每一项，然后打上标记。
+
+每一个块在第一次作整块之后就有了标记，此后它失去标记当且仅当它作边块。
+所有块作边块的总次数不超过 $2q$，所以
+- 所有块作为没有标记的整块的总次数不超过 $2q + 总块数$。
+
+
+---
+
+<div class=columns>
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++)
+        cin >> a[i];
+    
+    int B = (int) sqrt(n);
+    int NB = (n + B - 1) / B;
+    
+    vector<bool> mark(NB);
+    vector<int> val(NB);
+
+    auto push = [&](int ib) {
+        if (mark[ib]) {
+            for (int i = ib * B; i < (ib + 1) * B; i++) {
+                a[i] = val[ib];
+            }
+            mark[ib] = false;
+        }
+    };
+
+    int q = n;
+```
+
+```cpp
+    while (q--) {
+        int l, r, c;
+        cin >> l >> r >> c;
+        l--;
+        int lb = (l + B - 1) / B;
+        int rb = r / B;
+        int ans = 0;
+        if (lb > rb) {
+            push(lb - 1);
+            for (int i = l; i < r; i++) {
+                ans += a[i] == c;
+                a[i] = c;
+            }
+        } else {
+            if (l < lb * B) {
+                push(lb - 1);
+                for (int i = l; i < lb * B; i++) {
+                    ans += a[i] == c;
+                    a[i] = c;
+                }
+            }
+            if (rb * B < r) {
+                push(rb);
+                for (int i = rb * B; i < r; i++) {
+                    ans += a[i] == c;
+                    a[i] = c;
+                }
+            }
+            for (int i = lb; i < rb; i++) {
+                if (mark[i]) {
+                    ans += (val[i] == c) * B;
+                } else {
+                    for (int j = i * B; j < (i + 1) * B; j++)
+                        ans += a[j] == c;
+                }
+                mark[i] = true;
+                val[i] = c;
+            }
+        }
+        cout << ans << '\n';
+    }
+}
+```
+
+---
+
+# 区间推平
+
+「把 $a_l, \dots, a_r$ 都改为 $c$」这样的操作，也被称为**区间推平**。
+
+处理区间推平操作的另一个办法是**维护同值的连续段**：
+- 用一个 `map<下标类型，值类型>` 来表示一个序列，对于每个同值的连续段，只存这一段的第一项的下标和值。
+- 例如，序列 $a = (1, 2, 2, 3, 9, 2)$ 被表示为 $\set{(0, 1), (1, 2), (3, 3), (4, 9), (5, 2)}$（下标从 $0$ 开始）。
+
+这种表示序列的方法，也可看作一种分块：把每个同值的连续段作为一块。
+
+一次区间推平操作的影响：边块缩短，整块消失，新增一个块。
+
+---
+
+<div class=columns>
+<div>
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n;
+    cin >> n;
+    map<int,int> a;
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+    int q = n;
+    while (q--) {
+        int l, r, c;
+        cin >> l >> r >> c;
+        --l;
+        auto lptr = a.insert({l, prev(a.upper_bound(l))->second}).first;
+        auto rptr = a.insert({r, prev(a.upper_bound(r))->second}).first;
+        int ans = 0;
+        for (auto it = lptr; it != rptr; ++it) {
+            auto [i, v] = *it;
+            if (v == c) {
+                ans += next(it)->first - i;
+            }
+        }
+        a.erase(lptr, rptr);
+        a[l] = c;
+        cout << ans << '\n';
+    }
+}
+```
+</div>
+
+<div>
+
+推平区间 $[l, r)$
+1. 查询 $a_l, a_r$ 的值，把 $l, r$ 设置为端点。
+2. 查询区间 $[l, r)$。
+3. 删除区间 $[l, r)$ 上的端点。
+4. `a[l] = c;`。
+（把 $l$ 设置为端点，并把 $a_l$ 置为 $c$。
+也可以写 `a.insert({l, c});`。）
+
+</div>
+
+</div>
+
+---
+
+```cpp
+auto lptr = a.insert({l, prev(a.upper_bound(l))->second}).first;
+```
+- `prev(a.upper_bound(l))->second` 是 $a_l$ 的值。
+- `a.insert({l, al})` 尝试把 `{l, al}` 插入 map。
+返回一个 `pair<iterator, bool>`，.second 表示插入是否成功，.first 表示指向 `l` 对应的 pair 的迭代器（相当于指针）。
+
+---
+
+# Points
+
+[Codeforces 19D](https://codeforces.com/contest/19/problem/D)
+
+给你一个平面直角坐标系。处理 $n$ 个操作，操作有三种
+- `add x y`：给点 $(x, y)$ 打上标记。保证此时点 $(x, y)$ 上没有标记。
+- `remove x y`：擦除点 $(x,y)$ 上的标记。保证此时点 $(x, y)$ 上有标记。
+- `find x y`：检查是否有被标记的点 $(x', y')$ 满足 $x' > x$ 且 $y' > y$。若有，输出一个这样的点的坐标。若有多个，输出字典序最小的坐标。
+
+$1 \le n \le 2 \cdot 10^5$，点的坐标是不超过 $10^9$ 的非负整数。 
+
+---
+
+## 离线处理操作
+
+- 读取 $n$ 个操作。
+-  对读入的 $n$ 个点的横坐标进行**压缩**。例：$(30, 11, 42, 30) \to (1, 0, 2, 1)$。
+设压缩过后点的横坐标的范围是 $[0, N)$。
+
+## 分块
+- 取 $B = \lfloor\sqrt{N}\rfloor$，对横坐标的取值范围进行分块。这种分块我们称之为**值域分块**。
+- 对每个块 $\red{i}$，用一个 mutiset\<int\> `b[i]` 存储横坐标在块 $\red{i}$ 里的那些有标记的点的纵坐标。
+- 对每个横坐标 $j$，用一个 mutiset\<int\> `a[j]` 存储横坐标等于 $j$ 的那些有标记的点的纵坐标。
+
+---
+
+## 区间查询
+
+对于询问 `find x y`，我们要找出 $[x+1, N)$ 范围内第一个满足下述条件的横坐标 $j$
+- `a[j]` 里的最大元素大于 $y$ 的横坐标 $j$。
+
+为了快速找出这个横坐标，
+- 对于边块，逐个枚举其中相关的横坐标 $j$，检查 `a[j]` 的最大元素是否大于 $y$。
+- 对于整块 $\red{i}$，如果 `b[i]` 的最大值大于 $y$，就逐个检查其中的横坐标。
+
+当我们得到所求的横坐标 $j$ 后，再查找 `a[j]` 里第一个大于 $y$ 的值即可。
+
+## 单点修改
+
+对于操作 `add x y` 或 `move x y`，修改 `a[x]` 和 `b[x / B]`。
+
+
+---
+
+# 坐标压缩
+
+```cpp
+vector<int> compress(vector<int>& a) {
+    vector<pair<int,int>> vi;
+    for (int i = 0; i < (int) a.size(); i++)
+        vi.push_back({a[i], i});
+
+    sort(vi.begin(), vi.end());
+
+    vector<int> b;
+    for (auto [v, i] : vi) {
+        if (b.empty() || b.back() < v)
+            b.push_back(a[i]);
+        a[i] = (int) b.size() - 1;
+    }
+    return b; // 排序去重之后的 a
+}
+```
+
+---
+
+<div class=columns>
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n;
+    cin >> n;
+    vector<string> type(n);
+    vector<int> x(n), y(n);
+    for (int i = 0; i < n; i++)
+        cin >> type[i] >> x[i] >> y[i];
+
+    vector<int> real_x = compress(x);
+    
+    int N = (int) real_x.size();
+    int B = (int) sqrt(N);
+    int NB = (N + B - 1) / B;
+    
+    vector<multiset<int>> a(N), b(NB);
+ ```
+
+ ```cpp
+auto work = [&](int l, int r, auto ok) -> int {
+    int lb = (l + B - 1) / B;
+    int rb = r / B;
+    if (lb > rb) {
+        for (int i = l; i < r; i++)
+            if (ok(a[i]))
+                return i;
+        return r;
+    }
+
+    for (int i = l; i < lb * B; i++)
+        if (ok(a[i]))
+            return i;
+
+    for (int ib = lb; ib < rb; ib++)
+        if (ok(b[ib]))
+            for (int i = ib * B; i < (ib + 1) * B; i++)
+                if (ok(a[i]))
+                    return i;
+
+    for (int i = rb * B; i < r; i++)
+        if (ok(a[i]))
+            return i;
+
+    return r;
+};
+```
+
+---
+
+
+```cpp
+    for (int i = 0; i < n; i++) {
+        if (type[i] == "add") {
+            a[x[i]].insert(y[i]);
+            b[x[i] / B].insert(y[i]);
+        } else if (type[i] == "remove") {
+            a[x[i]].extract(y[i]); // 删除一个y[i]，since C++17
+            b[x[i] / B].extract(y[i]);
+        } else {
+            auto ok = [y = y[i]](const multiset<int>& s) {
+                return s.size() && *s.rbegin() > y; 
+            };
+            int j = work(x[i] + 1, N, ok);
+            if (j == N)
+                cout << -1 << '\n';
+            else
+                cout << real_x[j] << ' ' << *a[j].upper_bound(y[i]) << '\n';
+        }
+    }
+}
+```
+
+---
+
+## 用线段树解决这题
+
+
+1. 从下到上，把所查询的区间 $[x+1, N)$ 拆解为极大整块。找出从左到右第一个满足条件的极大整块 $\red{k}$。
+
+    在每一层
+    - 如果左边的极大整块 $\red{l}$ 满足条件，那么 $\red{l}$ 就是 $\red{k}$，结束。
+    - 如果右边的极大整块 $\red{r - 1}$ 满足条件，那么 $\red{k} \gets 
+    \red{r-1}$。
+2. 从块 $\red{k}$ 开始，往下查找，定位到满足条件的叶子 $\red{p}$，然后在其中查到第一个大于 $y$ 的横坐标。
+
+这个过程我们称之为**在线段树上二分查找**。
+
+---
+
+```cpp
+
+
+```
+
+---
+
+# 数列分块入门 9
+
+给你一个长为 $n$ 的整数序列 $a = (a_1, \dots, a_n)$。回答 $n$ 个询问
+- `l r`：输出 $a_l, \dots, a_r$ 的众数。若有多个，输出最小的那个。
+
+###### 限制
+
+- $1 \le n \le 3 \times 10^5$
+- $a_i$ 在 int 范围内。
+
+---
 
