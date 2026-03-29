@@ -1537,3 +1537,108 @@ auto work = [&](int l, int r, auto ok) -> int {
 
 ---
 
+## 坐标压缩
+
+设序列 $a$ 的元素的值被压缩为 $[0, m)$。
+
+## 分块
+
+取 $B = \sqrt{n}$
+
+---
+
+
+<div class=columns>
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n; cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++)
+        cin >> a[i];
+
+    vector<int> val = compress(a); //坐标压缩
+    int N = (int) val.size();
+
+    int B = (int) sqrt(n);
+    int NB = n / B;
+
+    vector<vector<pair<int,int>>> mode(NB, vector<pair<int,int>>(NB));
+
+    for (int i = 0; i < NB; i++) {
+        int mx = 0, v = -1;
+        vector<int> cnt(N);
+        for (int j = i; j < NB; j++) {
+            for (int k = j * B; k < (j + 1) * B; k++) {
+                ++cnt[a[k]];
+                if (cnt[a[k]] > mx || (cnt[a[k]] == mx && a[k] < v)) {
+                    mx = cnt[a[k]];
+                    v = a[k];
+                }
+            }
+            mode[i][j] = {v, mx};
+        }
+    }
+
+    vector<vector<int>> pos(N);
+    vector<int> rank(n);
+    for (int i = 0; i < n; i++) {
+        rank[i] = (int) pos[a[i]].size();
+        pos[a[i]].push_back(i);
+    }
+```
+
+```cpp
+    int q = n;
+    while (q--) {
+        int l, r;
+        cin >> l >> r;
+        --l;
+
+        int lb = (l + B - 1) / B, rb = r / B;
+        int v = -1, mx = 0;
+
+        if (lb >= rb) {
+            for (int i = l; i < r; i++) {
+                int j = rank[i] + mx;
+                while (j < (int) pos[a[i]].size() && pos[a[i]][j] < r)
+                    j++;
+                if (mx < j - rank[i]) {
+                    mx = j - rank[i];
+                    v = a[i];
+                } else if (a[i] < v && j - 1 < (int) pos[a[i]].size() && pos[a[i]][j - 1] < r) {
+                    v = a[i];
+                }
+            }
+        } else {
+            v = mode[lb][rb - 1].first;
+            mx = mode[lb][rb - 1].second;
+            for (int i = l; i < lb * B; i++) {
+                int j = rank[i] + mx;
+                while (j < (int) pos[a[i]].size() && pos[a[i]][j] < r)
+                    j++;
+                if (mx < j - rank[i]) {
+                    mx = j - rank[i];
+                    v = a[i];
+                } else if (a[i] < v && j - 1 < (int) pos[a[i]].size() && pos[a[i]][j - 1] < r) {
+                    v = a[i];
+                }
+            }
+            for (int i = rb * B; i < r; i++) {
+                int j = rank[i] - mx;
+                while (j >= 0 && pos[a[i]][j] >= l)
+                    j--;
+                if (mx < rank[i] - j) {
+                    mx = rank[i] - j;
+                    v = a[i];
+                } else if (a[i] < v && j + 1 >= 0 && pos[a[i]][j + 1] >= l) {
+                    v = a[i];
+                }
+            }
+        }
+        cout << val[v] << '\n';
+    }
+}
+```
