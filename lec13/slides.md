@@ -14,6 +14,7 @@ title: 从分块到线段树
 
 
 $\newcommand{\red}[1]{{\color{red}#1}}$
+$\newcommand{\blue}[1]{{\color{blue}#1}}$
 
 </div>
 
@@ -574,7 +575,7 @@ int main() {
 
 1. 按从上到下的顺序，下传边块（$\color{red} 5$ 和 $\color{red} 4$）的标记 `add[j]`。
 2. 更新极大整块（$\red{11}$、$\red{8}$、$\red{3}$）的标记和值。
-3. 按从下到上的顺序，更新边块的标志和值。
+3. 按从下到上的顺序，更新边块的值。
 
 
 
@@ -983,11 +984,11 @@ int main() {
 
 对于整块 $\red{i}$，更新 `tag[i]`。
 
-对于边块 $\red{i}$，把 `tag[i]` 下传的数组 `a`，然后逐个修改当前块内涉及的元素。
+对于边块 $\red{i}$，把 `tag[i]` 下传到数组 `a`，然后逐个修改当前块内涉及的元素。
 
 ## 单点查询
 
-把 `tag[i / B]` 对作用到 `a[i]`，就得到当前的 $a_i$。
+把 `tag[i / B]` 作用到 `a[i]`，就得到当前的 $a_i$。
 
 
 ---
@@ -1291,7 +1292,7 @@ int main() {
 
 处理区间推平操作的另一个办法是**维护同值的连续段**：
 - 用一个 `map<下标类型，值类型>` 来表示一个序列，对于每个同值的连续段，只存这一段的第一项的下标和值。
-- 例如，序列 $a = (1, 2, 2, 3, 9, 2)$ 被表示为 $\set{(0, 1), (1, 2), (3, 3), (4, 9), (5, 2)}$（下标从 $0$ 开始）。
+- 例如，序列 $a = (1, 2, 2, 3, 9, 2)$ 被表示为 $\set{(\blue{0}, 1), (\blue{1}, 2), (\blue{3}, 3), (\blue{4}, 9), (\blue{5}, 2)}$（下标从零开始）。我们把下标 $\blue{0}, \blue{1}, \blue{3}, \blue{4}, \blue{5}$ 称为**端点**。
 
 这种表示序列的方法，也可看作一种分块：把每个同值的连续段作为一块。
 
@@ -1366,7 +1367,7 @@ auto lptr = a.insert({l, prev(a.upper_bound(l))->second}).first;
 给你一个平面直角坐标系。处理 $n$ 个操作，操作有三种
 - `add x y`：给点 $(x, y)$ 打上标记。保证此时点 $(x, y)$ 上没有标记。
 - `remove x y`：擦除点 $(x,y)$ 上的标记。保证此时点 $(x, y)$ 上有标记。
-- `find x y`：检查是否有被标记的点 $(x', y')$ 满足 $x' > x$ 且 $y' > y$。若有，输出一个这样的点的坐标。若有多个，输出字典序最小的坐标。
+- `find x y`：检查是否有被标记的点 $(x', y')$ 满足 $x' > x$ 且 $y' > y$。若有，输出一个这样的点的坐标。若有多个，输出字典序最小的坐标。若没有，输出 -1。
 
 $1 \le n \le 2 \cdot 10^5$，点的坐标是不超过 $10^9$ 的非负整数。 
 
@@ -1381,7 +1382,7 @@ $1 \le n \le 2 \cdot 10^5$，点的坐标是不超过 $10^9$ 的非负整数。
 ## 分块
 - 取 $B = \lfloor\sqrt{N}\rfloor$，对横坐标的取值范围进行分块。这种分块我们称之为**值域分块**。
 - 对每个块 $\red{i}$，用一个 mutiset\<int\> `b[i]` 存储横坐标在块 $\red{i}$ 里的那些有标记的点的纵坐标。
-- 对每个横坐标 $j$，用一个 mutiset\<int\> `a[j]` 存储横坐标等于 $j$ 的那些有标记的点的纵坐标。
+- 对每个横坐标 $j$，用一个 set\<int\> `a[j]` 存储横坐标等于 $j$ 的那些有标记的点的纵坐标。
 
 ---
 
@@ -1444,7 +1445,8 @@ int main() {
     int B = (int) sqrt(N);
     int NB = (N + B - 1) / B;
     
-    vector<multiset<int>> a(N), b(NB);
+    vector<set<int>> a(N);
+    vector<multiset<int>> b(NB);
  ```
 
  ```cpp
@@ -1485,7 +1487,7 @@ auto work = [&](int l, int r, auto ok) -> int {
             a[x[i]].insert(y[i]);
             b[x[i] / B].insert(y[i]);
         } else if (type[i] == "remove") {
-            a[x[i]].extract(y[i]); // 删除一个y[i]，since C++17
+            a[x[i]].e(y[i]); // 删除一个y[i]，since C++17
             b[x[i] / B].extract(y[i]);
         } else {
             auto ok = [y = y[i]](const multiset<int>& s) {
@@ -1503,24 +1505,107 @@ auto work = [&](int l, int r, auto ok) -> int {
 
 ---
 
-## 用线段树解决这题
+# 用线段树解决这题
 
 
-1. 从下到上，把所查询的区间 $[x+1, N)$ 拆解为极大整块。找出从左到右第一个满足条件的极大整块 $\red{k}$。
+```cpp
+vector<int> b(2 * N, -1);
+vector<set<int>> a(N);
+```
 
-    在每一层
-    - 如果左边的极大整块 $\red{l}$ 满足条件，那么 $\red{l}$ 就是 $\red{k}$，结束。
-    - 如果右边的极大整块 $\red{r - 1}$ 满足条件，那么 $\red{k} \gets 
-    \red{r-1}$。
-2. 从块 $\red{k}$ 开始，往下查找，定位到满足条件的叶子 $\red{p}$，然后在其中查到第一个大于 $y$ 的横坐标。
+线段树的每个节点 `b[i]` 维护「横坐标在相应范围内的点」的纵坐标的最大值。
 
-这个过程我们称之为**在线段树上二分查找**。
+每对个横坐标 $x$，用一个 set\<int\> `a[x]` 来存储横坐标等于 $x$ 的点的纵坐标。
+
+## 单点修改
+
+对于操作 `add x y` 或 `remove x y`，
+1. 修改 `a[x]`
+2. 更新线段树的叶子 `b[x + N]`
+3. 从下往上，更新 `x + N` 的祖先节点
 
 ---
 
+## 区间查询
+
+`find x, y`：找出区间 $[x + 1, N)$ 中第一个满足 `b[i + N] > y` 的 `i`。
+1. 从下往上，把所查询的区间 $[x+1, N)$ 拆解为极大整块，找出从左到右第一个满足 `b[k] > y` 的极大整块 $\red{k}$。
+    在每一层
+    - 如果左边的极大整块 $\red{l}$ 满足 `b[l] > y`，那么 $\red{l}$ 就是 $\red{k}$，结束。
+    - 如果右边的极大整块 $\red{r - 1}$ 满足 `b[r - 1] > y`，那么 $\red{k} \gets 
+    \red{r-1}$。
+2. 从节点 $\red{k}$ 开始，往下查找，定位到满足 `b[p] > y` 的叶子 $\red{p}$。
+3. 在 `a[p - N]` 中查找第一个大于 $y$ 的纵坐标。
+
+我们把 1 2 两步称为**在线段树上二分查找**。
+
+---
+
+<div class=columns>
+
 ```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n;
+    cin >> n;
+    vector<string> type(n);
+    vector<int> x(n), y(n);
+    for (int i = 0; i < n; i++)
+        cin >> type[i] >> x[i] >> y[i];
 
+    vector<int> real_x = compress(x); //坐标压缩
+    int N = (int) real_x.size();
+    vector<set<int>> a(N);
+    vector<int> b(2 * N, -1); //线段树
 
+    for (int i = 0; i < n; i++) {
+        if (type[i] == "add") {
+            a[x[i]].insert(y[i]);
+            int p = x[i] + N;
+            b[p] = *a[x[i]].rbegin();
+            for (p /= 2; p > 0; p /= 2) {
+                b[p] = max(b[p * 2], b[p * 2 + 1]);
+            }
+        } else if (type[i] == "remove") {
+            a[x[i]].erase(y[i]);
+            int p = x[i] + N;
+            b[p] = a[x[i]].empty() ? -1 : *a[x[i]].rbegin();
+            for (p /= 2; p > 0; p /= 2) {
+                b[p] = max(b[p * 2], b[p * 2 + 1]);
+            }
+        } else {
+```
+
+```cpp
+            int l = x[i] + 1 + N, r = N + N;
+            int p = -1;
+            while (l < r) {
+                if (l & 1) {
+                    if (b[l] > y[i]) { p = l; break; }
+                    l++;
+                }
+                if (r & 1) {
+                    if (b[r - 1] > y[i]) p = r - 1;
+                    r--;
+                }
+                l /= 2; r /= 2;
+            }
+            if (p == -1)
+                cout << -1 << '\n';
+            else {
+                while (p < N) {
+                    if (b[p * 2] > y[i])
+                        p = 2 * p;
+                    else
+                        p = 2 * p + 1;
+                }
+                cout << real_x[p - N] << ' ' <<
+                    *a[p - N].upper_bound(y[i]) << '\n';
+            }
+        }
+    }
+}
 ```
 
 ---
@@ -1537,17 +1622,124 @@ auto work = [&](int l, int r, auto ok) -> int {
 
 ---
 
-## 坐标压缩
-
-设序列 $a$ 的元素的值被压缩为 $[0, m)$。
-
-## 分块
-
-取 $B = \sqrt{n}$
+为了突出重点以及便于讲述，以下我们讨论如何求出 $a_l, \dots, a_r$ 的一个众数，不管它是不是最小的众数。
 
 ---
 
+## 坐标压缩
 
+设序列 $a$ 的元素的值被压缩为 $[0, N)$。
+
+## 分块
+
+取 $B = \lfloor\sqrt{n}\rfloor$。
+一共有 $\lfloor N/B\rfloor$ 个块。（不是 $\lceil N/B\rceil$ 块，最后剩下的不到 $B$ 项不管。）
+
+
+## 预处理
+
+```cpp
+int NB = N / B;
+vector<vector<int>> mode(NB, vector<int>(NB)); 
+vector<vector<int>> f(NB, vector<int>(NB));
+```
+
+
+`mode[i][j]`：从第 $\red{i}$ 块到第 $\red{j}$ 块这一段的众数。
+`f[i][j]`：从第 $\red{i}$ 块到第 $\red{j}$ 块这一段的众数的出现次数。
+
+
+
+---
+
+## 查询区间 $[l, r)$ 的众数
+
+![h:100](range_mode_query.svg)
+
+如果区间 $[l, r)$ 的众数不是 `mode[i][j]`，那么它一定在边块里出现过。
+
+我们检查边块里的数在区间 $[l, r)$ 上出现的次数是不是**更多**。
+
+---
+
+![h:100](range_mode_query.svg)
+
+对于区间 $[l, r)$ 中落在左边块里的一项 $\bbox[gold,1pt]{a_k}$，我们检查
+- $a_k$ 在区间 $[k, r)$ 上的出现次数是否大于 `f[i][j]`。
+
+为此，我们预先算出一些数据：
+```cpp
+vector<vector<int>> pos(N);
+vector<int> rank(n);
+```
+- `pos[x]`：$x$ 在序列 $a$ 中出现的位置（$0 \le x < N$）。
+- `rank[i]`：$a_i$ 在所有跟它相同的数中排第几？即 $i$ 在 `pos[a[i]]` 里排第几？
+
+例：$a = (2, 3, 3, 0, 1, 1, 4, 5, 1, 4)$，`pos[1]` 是 `{4, 5, 8}`（下标从 0 开始），
+`rank` 是 `{0, 0, 1, 0, 0, 1, 0, 0, 2, 1}`。
+
+---
+
+## 计算 pos 和 rank
+
+```cpp
+vector<vector<int>> pos(N);
+vector<int> rank(n);
+for (int i = 0; i < n; i++) {
+    rank[i] = (int) pos[a[i]].size();
+    pos[a[i]].push_back(i);
+}
+```
+
+## 利用 pos 和 rank
+
+「$a_k$ 在区间 $[k, r)$ 上的出现次数大于 $10$」可以表述为
+```cpp
+pos[a[k]].size() > rank[k] + 10 &&
+    pos[a[k]][rank[k] + 10] < r
+```
+
+---
+
+## 检查边块里的数出现次数是否更多
+
+```cpp
+int lb = (l + B - 1) / B, rb = r / B;
+if (lb > rb) {
+    int v = mode[lb][rb - 1];
+    int mx = f[lb][rb - 1];
+    // 检查左边块里的数
+    for (int i = l; i < lb * B; i++) {
+        int j = rank[i] + mx;
+        while (j < pos[a[i]].size() && pos[a[i]][j] < r)
+            j++;
+        if (mx < j - rank[i]) {
+            mx = j - rank[i];
+            v = a[i];
+        }
+    }
+    // 检查右边块里的数
+    for (int i = r - 1; i >= rb * B; i--) {
+        int j = rank[i] - mx;
+        while (j >= 0 && pos[a[i]][j] >= l)
+            j--;
+        if (mx < rank[i] - j) {
+            mx = rank[i] - j;
+            v = a[i];
+        }
+    }
+}
+```
+
+`j++;` 和 `j--;` 执行的总次数不超过区间 $[l, r)$ 落在左右边块里的部分的长度之和。
+
+
+
+
+
+---
+
+## 完整代码
 <div class=columns>
 
 ```cpp
