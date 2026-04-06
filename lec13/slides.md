@@ -3,12 +3,14 @@ marp: true
 paginate: true
 math: mathjax
 theme: lecture
-title: 从分块到线段树
+title: 从分块到线段树（一）：序列分块
 ---
 
-# 从分块到线段树
+# 从分块到线段树（一）
 
-## 在线处理区间询问
+## 序列分块
+
+### 在线回答区间询问
 
 <div>
 
@@ -158,7 +160,7 @@ int main() {
 
 # 给 $a_1$ 到 $a_7$ 加 $3$
 
-![h:400](segtree_add_4.svg)
+![h:450 center](segtree_add_4.svg)
 
 对于区间 $[1, 8)$ 来说，$\red{11}$、$\red{8}$、$\red{3}$ 是整块，但是它们的父节点不是整块（而是边块），我们把这样的整块称为**极大整块**。
 
@@ -1358,255 +1360,38 @@ auto lptr = a.insert({l, prev(a.upper_bound(l))->second}).first;
 - `a.insert({l, al})` 尝试把 `{l, al}` 插入 map。
 返回一个 `pair<iterator, bool>`，.second 表示插入是否成功，.first 表示指向 `l` 对应的 pair 的迭代器（相当于指针）。
 
----
-
-# Points
-
-[Codeforces 19D](https://codeforces.com/contest/19/problem/D)
-
-给你一个平面直角坐标系。处理 $n$ 个操作，操作有三种
-- `add x y`：给点 $(x, y)$ 打上标记。保证此时点 $(x, y)$ 上没有标记。
-- `remove x y`：擦除点 $(x,y)$ 上的标记。保证此时点 $(x, y)$ 上有标记。
-- `find x y`：检查是否有被标记的点 $(x', y')$ 满足 $x' > x$ 且 $y' > y$。若有，输出一个这样的点的坐标。若有多个，输出字典序最小的坐标。若没有，输出 -1。
-
-$1 \le n \le 2 \cdot 10^5$，点的坐标是不超过 $10^9$ 的非负整数。 
 
 ---
 
-## 离线处理操作
+# One Occurrence
 
-- 读取 $n$ 个操作。
--  对读入的 $n$ 个点的横坐标进行**压缩**。例：$(30, 11, 42, 30) \to (1, 0, 2, 1)$。
-设压缩过后点的横坐标的范围是 $[0, N)$。
+https://codeforces.com/contest/1000/problem/F
+
+
+给你一个长为 $n$ 的正整数序列 $a = (a_1, a_2, \dots, a_n)$。回答 $q$ 个询问：
+
+- `l r`：输出一个在 $a_l, a_{l+1}, \dots, a_r$ 中恰好出现一次的数。如果多个这样的数，任意输出一个。若没有这样的数，输出 `0`。
+
+$1 \le n, q, a_i \le 5\cdot 10^5$
+
+
+---
+
+prev[i]：在 $a_i$ 左边第一个等于 $a_i$ 的项的下标。
+若不存在这样的项，置 prev[i] 为 $0$。 
+
+next[i]：在 $a_i$ 右边第一个等于 $a_i$ 的项的下标。
+若不存在这样的项，置 next[i] 为 $n + 1$。
+
+$a_i$ 在 $a_l, \dots, a_r$ 上是唯一的，相当于说 prev[i] < l ≤ i ≤  r < next[i]。
+
+---
 
 ## 分块
-- 取 $B = \lfloor\sqrt{N}\rfloor$，对横坐标的取值范围进行分块。这种分块我们称之为**值域分块**。
-- 对每个块 $\red{i}$，用一个 mutiset\<int\> `b[i]` 存储横坐标在块 $\red{i}$ 里的那些有标记的点的纵坐标。
-- 对每个横坐标 $j$，用一个 set\<int\> `a[j]` 存储横坐标等于 $j$ 的那些有标记的点的纵坐标。
 
----
+取 $B = \lfloor\sqrt{n}\rfloor$。
 
-## 区间查询
-
-对于询问 `find x y`，我们要找出 $[x+1, N)$ 范围内第一个满足下述条件的横坐标 $j$
-- `a[j]` 里的最大元素大于 $y$
-
-为了快速找出这个横坐标，
-- 对于边块，逐个枚举其中相关的横坐标 $j$，检查 `a[j]` 的最大元素是否大于 $y$。
-- 对于整块 $\red{i}$，如果 `b[i]` 的最大值大于 $y$，就逐个检查其中的横坐标。
-
-当我们得到所求的横坐标 $j$ 后，再查找 `a[j]` 里第一个大于 $y$ 的值即可。
-
-## 单点修改
-
-对于操作 `add x y` 或 `move x y`，修改 `a[x]` 和 `b[x / B]`。
-
-
----
-
-# 坐标压缩
-
-```cpp
-vector<int> compress(vector<int>& a) {
-    vector<pair<int,int>> vi;
-    for (int i = 0; i < (int) a.size(); i++)
-        vi.push_back({a[i], i});
-
-    sort(vi.begin(), vi.end());
-
-    vector<int> b;
-    for (auto [v, i] : vi) {
-        if (b.empty() || b.back() < v)
-            b.push_back(a[i]);
-        a[i] = (int) b.size() - 1;
-    }
-    return b; // 排序去重之后的 a
-}
-```
-
----
-
-<div class=columns>
-
-```cpp
-int main() {
-    ios::sync_with_stdio(0);
-    cin.tie(0);
-    int n;
-    cin >> n;
-    vector<string> type(n);
-    vector<int> x(n), y(n);
-    for (int i = 0; i < n; i++)
-        cin >> type[i] >> x[i] >> y[i];
-
-    vector<int> real_x = compress(x);
-    
-    int N = (int) real_x.size();
-    int B = (int) sqrt(N);
-    int NB = (N + B - 1) / B;
-    
-    vector<set<int>> a(N);
-    vector<multiset<int>> b(NB);
- ```
-
- ```cpp
-auto work = [&](int l, int r, auto ok) -> int {
-    int lb = (l + B - 1) / B;
-    int rb = r / B;
-    if (lb > rb) {
-        for (int i = l; i < r; i++)
-            if (ok(a[i]))
-                return i;
-        return r;
-    }
-
-    for (int i = l; i < lb * B; i++)
-        if (ok(a[i]))
-            return i;
-
-    for (int ib = lb; ib < rb; ib++)
-        if (ok(b[ib]))
-            for (int i = ib * B; i < (ib + 1) * B; i++)
-                if (ok(a[i]))
-                    return i;
-
-    for (int i = rb * B; i < r; i++)
-        if (ok(a[i]))
-            return i;
-
-    return r;
-};
-```
-
----
-
-
-```cpp
-    for (int i = 0; i < n; i++) {
-        if (type[i] == "add") {
-            a[x[i]].insert(y[i]);
-            b[x[i] / B].insert(y[i]);
-        } else if (type[i] == "remove") {
-            a[x[i]].e(y[i]); // 删除一个y[i]，since C++17
-            b[x[i] / B].extract(y[i]);
-        } else {
-            auto ok = [y = y[i]](const multiset<int>& s) {
-                return s.size() && *s.rbegin() > y; 
-            };
-            int j = work(x[i] + 1, N, ok);
-            if (j == N)
-                cout << -1 << '\n';
-            else
-                cout << real_x[j] << ' ' << *a[j].upper_bound(y[i]) << '\n';
-        }
-    }
-}
-```
-
----
-
-# 用线段树解决这题
-
-
-```cpp
-vector<int> b(2 * N, -1);
-vector<set<int>> a(N);
-```
-
-线段树的每个节点 `b[i]` 维护「横坐标在相应范围内的点」的纵坐标的最大值。
-
-每对个横坐标 $x$，用一个 set\<int\> `a[x]` 来存储横坐标等于 $x$ 的点的纵坐标。
-
-## 单点修改
-
-对于操作 `add x y` 或 `remove x y`，
-1. 修改 `a[x]`
-2. 更新线段树的叶子 `b[x + N]`
-3. 从下往上，更新 `x + N` 的祖先节点
-
----
-
-## 区间查询
-
-`find x, y`：找出区间 $[x + 1, N)$ 中第一个满足 `b[i + N] > y` 的 `i`。
-1. 从下往上，把所查询的区间 $[x+1, N)$ 拆解为极大整块，找出从左到右第一个满足 `b[k] > y` 的极大整块 $\red{k}$。
-    在每一层
-    - 如果左边的极大整块 $\red{l}$ 满足 `b[l] > y`，那么 $\red{l}$ 就是 $\red{k}$，结束。
-    - 如果右边的极大整块 $\red{r - 1}$ 满足 `b[r - 1] > y`，那么 $\red{k} \gets 
-    \red{r-1}$。
-2. 从节点 $\red{k}$ 开始，往下查找，定位到满足 `b[p] > y` 的叶子 $\red{p}$。
-3. 在 `a[p - N]` 中查找第一个大于 $y$ 的纵坐标。
-
-我们把 1 2 两步称为**在线段树上二分查找**。
-
----
-
-<div class=columns>
-
-```cpp
-int main() {
-    ios::sync_with_stdio(0);
-    cin.tie(0);
-    int n;
-    cin >> n;
-    vector<string> type(n);
-    vector<int> x(n), y(n);
-    for (int i = 0; i < n; i++)
-        cin >> type[i] >> x[i] >> y[i];
-
-    vector<int> real_x = compress(x); //坐标压缩
-    int N = (int) real_x.size();
-    vector<set<int>> a(N);
-    vector<int> b(2 * N, -1); //线段树
-
-    for (int i = 0; i < n; i++) {
-        if (type[i] == "add") {
-            a[x[i]].insert(y[i]);
-            int p = x[i] + N;
-            b[p] = *a[x[i]].rbegin();
-            for (p /= 2; p > 0; p /= 2) {
-                b[p] = max(b[p * 2], b[p * 2 + 1]);
-            }
-        } else if (type[i] == "remove") {
-            a[x[i]].erase(y[i]);
-            int p = x[i] + N;
-            b[p] = a[x[i]].empty() ? -1 : *a[x[i]].rbegin();
-            for (p /= 2; p > 0; p /= 2) {
-                b[p] = max(b[p * 2], b[p * 2 + 1]);
-            }
-        } else {
-```
-
-```cpp
-            int l = x[i] + 1 + N, r = N + N;
-            int p = -1;
-            while (l < r) {
-                if (l & 1) {
-                    if (b[l] > y[i]) { p = l; break; }
-                    l++;
-                }
-                if (r & 1) {
-                    if (b[r - 1] > y[i]) p = r - 1;
-                    r--;
-                }
-                l /= 2; r /= 2;
-            }
-            if (p == -1)
-                cout << -1 << '\n';
-            else {
-                while (p < N) {
-                    if (b[p * 2] > y[i])
-                        p = 2 * p;
-                    else
-                        p = 2 * p + 1;
-                }
-                cout << real_x[p - N] << ' ' <<
-                    *a[p - N].upper_bound(y[i]) << '\n';
-            }
-        }
-    }
-}
-```
+`f[i]`：第 $\red{i}$ 块内，满足 prev[j] < $\red{i}\cdot B$ 且 next[j] 最大的那个下标 $j$。
 
 ---
 
@@ -1624,22 +1409,21 @@ int main() {
 
 为了突出重点以及便于讲述，以下我们讨论如何求出 $a_l, \dots, a_r$ 的一个众数，不管它是不是最小的众数。
 
+
+
 ---
 
-## 坐标压缩
-
-设序列 $a$ 的元素的值被压缩为 $[0, N)$。
 
 ## 分块
 
-取 $B = \lfloor\sqrt{n}\rfloor$。
-一共有 $\lfloor N/B\rfloor$ 个块。（不是 $\lceil N/B\rceil$ 块，最后剩下的不到 $B$ 项不管。）
+取 $B = \lfloor\sqrt{n}\rfloor$，把序列 $a$ 分成 $\lfloor n/B\rfloor$ 个块。
+（不是 $\lceil n/B\rceil$ 块，最后剩下的不到 $B$ 项不管。）
 
 
 ## 预处理
 
 ```cpp
-int NB = N / B;
+int NB = n / B;
 vector<vector<int>> mode(NB, vector<int>(NB)); 
 vector<vector<int>> f(NB, vector<int>(NB));
 ```
@@ -1667,7 +1451,18 @@ vector<vector<int>> f(NB, vector<int>(NB));
 对于区间 $[l, r)$ 中落在左边块里的一项 $\bbox[gold,1pt]{a_k}$，我们检查
 - $a_k$ 在区间 $[k, r)$ 上的出现次数是否大于 `f[i][j]`。
 
-为此，我们预先算出一些数据：
+为此，我们做一些预处理。
+
+---
+
+## 预处理 1
+
+对序列 $a$ 的元素的值进行压缩。例：$(30, 11, 42, 30) \to (1, 0, 2, 1)$。我们把这个操作称为**坐标压缩**。
+
+设压缩过后 $a$ 的元素的取值范围是 $[0, N)$。
+
+## 预处理 2
+
 ```cpp
 vector<vector<int>> pos(N);
 vector<int> rank(n);
@@ -1677,6 +1472,28 @@ vector<int> rank(n);
 
 例：$a = (2, 3, 3, 0, 1, 1, 4, 5, 1, 4)$，`pos[1]` 是 `{4, 5, 8}`（下标从 0 开始），
 `rank` 是 `{0, 0, 1, 0, 0, 1, 0, 0, 2, 1}`。
+
+---
+
+## 坐标压缩
+
+```cpp
+vector<int> compress(vector<int>& a) {
+    vector<pair<int,int>> vi;
+    for (int i = 0; i < (int) a.size(); i++)
+        vi.push_back({a[i], i});
+
+    sort(vi.begin(), vi.end());
+
+    vector<int> b;
+    for (auto [v, i] : vi) {
+        if (b.empty() || b.back() < v)
+            b.push_back(a[i]);
+        a[i] = (int) b.size() - 1;
+    }
+    return b; // 排序去重之后的 a
+}
+```
 
 ---
 
@@ -1834,3 +1651,248 @@ int main() {
     }
 }
 ```
+
+---
+
+# Marisa is happy
+
+https://marisaoj.com/problem/652
+
+
+给你一个长为 $n$ 的序列 $a = (a_1, \dots, a_n)$，最初每个 $a_i$ 都等于 $0$，又给你一个 $1, 2, \dots, n$ 的排列 $p = (p_1, \dots, p_n)$ 和 $q$ 个询问：
+
+- `0 l r x`：给 $a_l, a_{l+1}, \dots, a_r$ 每个都加上 $x$。
+- `1 l r x`：给 $a_{p_l}, a_{p_{l+1}}, \dots, a_{p_r}$ 每个都加上 $x$。
+- `2 l r`：求 $a_l + a_{l+1} + \dots + a_r$。
+- `3 l r`：求 $a_{p_l} + a_{p_{l+1}} + \dots + a_{p_r}$。
+
+$1 \le n, q \le 10^5$，$1 \le x \le 10^6$
+
+---
+
+其实我们有两个序列，$a = (a_1, a_2, \dots, a_n)$ 和 $a' = (a_{p_1}, a_{p_2}, \dots, a_{p_n})$，一个是另一个重新排列。
+
+操作是对二者的区间加和求区间和。
+
+困难来自于，对某个序列的区间加，也会改变另一个序列。再后者当中，被改变的那些元素的位置不是连续的，而可能相当分散。
+
+下面我们说一个很妙的解法。
+
+---
+
+## 分块
+
+取 $B = \lfloor \sqrt{n} \rfloor$，对序列 $a$ 和 $a'$ 进行分块。
+
+<div class=topic-box>
+
+对 $a$ 和 $a'$ 进行分块，其实也就是对下标序列 $(1, 2, \dots, n)$ 和 $(p_1, \dots, p_n)$ 进行分块。
+
+</div>
+
+$s[\red{i}][j]$：下标 $1, 2, \dots, j$ 中有多少个落在序列 $(p_1, p_2, \dots, p_n)$ 的第 $\red{i}$ 块里。
+
+$t[\red{i}][j]$：下标 $p_1, p_2, \dots, p_j$ 中多少个落在序列 $(1, 2, \dots, n)$ 的第 $\red{i}$ 块里。
+
+`add1[i]`：序列 $a$ 的第 $\red{i}$ 块被整体加的数的总和。
+
+`add2[i]`：序列 $a'$ 的第 $\red{i}$ 块被整体加的数的总和。
+
+这样，序列 $a$ 的第 $\red{i}$ 块受到的整体加操作对序列 $a'$ 的区间 $[l, r]$ 的和的**贡献**就是
+$$
+(t[\red{i}][r] - t[\red{i}][l - 1]) \cdot \mathtt{add1}[\red{i}].
+$$
+
+---
+
+用上面的办法，我们能够处理区间加操作对的整块修改。
+剩下的就是区间加操作对边块的修改。这一部分逐个元素修改就可以了。
+
+`sum1[i]`：序列 $a$ 的第 $\red{i}$ 块的元素和，只计每次区间加操作时边块的贡献。
+
+`sum2[i]`：序列 $a'$ 的第 $\red{i}$ 块的元素和，只计每次区间加操作时边块的贡献。
+
+---
+
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n, q;
+    cin >> n >> q;
+    vector<int> p(n), ip(n);
+    for (int i = 0; i < n; i++) {
+        cin >> p[i];
+        p[i]--;
+        ip[p[i]] = i;
+    }
+    int B = (int) sqrt(n);
+    int NB = (n + B - 1) / B;
+    vector<vector<int>> s(NB, vector<int>(n + 1));
+    vector<vector<int>> t(NB, vector<int>(n + 1));
+
+    for (int i = 0; i < NB; i++) {
+        int l = i * B, r = min(l + B, n);
+        // 计算前缀和
+        for (int j = 0; j < n; j++)
+            s[i][j + 1] += s[i][j] + (l <= ip[j] && ip[j] < r);
+        for (int j = 0; j < n; j++)
+            t[i][j + 1] = t[i][j] + (l <= p[j] && p[j] < r);
+    }
+```
+
+---
+
+```cpp
+    vector<long long> add1(NB), add2(NB), sum1(NB), sum2(NB);
+    vector<long long> a1(n), a2(n);
+```
+
+<div class=columns>
+
+```cpp
+    auto work0 = [&](int l, int r, int x) {
+        for (int i = l; i < r; i++) {
+            a1[i] += x;
+            sum1[i / B] += x;
+            a2[ip[i]] += x;
+            sum2[ip[i] / B] += x;
+        }
+    };
+
+    auto work1 = [&](int l, int r, int x) {
+        for (int i = l; i < r; i++) {
+            a2[i] += x;
+            sum2[i / B] += x;
+            a1[p[i]] += x;
+            sum1[p[i] / B] += x;
+        }
+    };
+```
+
+```cpp
+    auto query2 = [&](int l, int r) {
+        long long ans = 0;
+        for (int i = l; i < r; i++)
+            ans += a1[i] + add1[i / B];
+        return ans;
+    };
+
+    auto query3 = [&](int l, int r) {
+        long long ans = 0;
+        for (int i = l; i < r; i++)
+            ans += a2[i] + add2[i / B];
+        return ans;
+    };
+```
+
+</div>
+
+
+---
+
+<div class=columns>
+
+```cpp
+    while (q--) {
+        int type, l, r, x;
+        cin >> type >> l >> r;
+        if (type < 2) cin >> x;
+        l--;
+        int lb = (l + B - 1) / B, rb = r / B;
+        long long ans = 0;
+
+        if (type == 0) {
+            if (lb > rb) {
+                work0(l, r, x);
+            }
+            else {
+                work0(l, lb * B, x);
+                work0(rb * B, r, x);
+                for (int i = lb; i < rb; i++)
+                    add1[i] += x;
+            }
+        } else if (type == 1) {
+            if (lb > rb) {
+                work1(l, r, x);
+            } else {
+                work1(l, lb * B, x);
+                work1(rb * B, r, x);
+                for (int i = lb; i < rb; i++)
+                    add2[i] += x;
+            }
+        }
+```
+
+```cpp
+        else if (type == 2) {
+            if (lb > rb) ans = query2(l, r);
+            else {
+                ans = query2(l, lb * B) + query2(rb * B, r);
+                for (int i = lb; i < rb; i++)
+                    ans += sum1[i] + add1[i] * B;
+            }
+            for (int i = 0; i < NB; i++)
+                ans += add2[i] * (s[i][r] - s[i][l]);
+        } else {
+            if (lb > rb) ans += query3(l, r);
+            else {
+                ans = query3(l, lb * B) + query3(rb * B, r);
+                for (int i = lb; i < rb; i++)
+                    ans += sum2[i] + add2[i] * B;
+            }
+            for (int i = 0; i < NB; i++)
+                ans += add1[i] * (t[i][r] - t[i][l]);
+        }
+        if (type >= 2) cout << ans << '\n';
+    }
+}
+```
+
+</div>
+
+
+---
+
+# Yuno loves sqrt technology I
+
+https://www.luogu.com.cn/problem/P5046
+
+给你一个 $1, 2, \dots, n$ 的**排列** $p = (p_1, \dots, p_n)$。回答 $m$ 个询问
+
+- `l r`：求 $p_l, p_{l+1}, \dots, p_r$ 的逆序数。
+
+强制在线。每次询问的 $l$ $r$ 等于输入的 $l$ $r$ 异或上一次询问的答案。
+对于第一次询问，上一次询问的答案视作 $0$。
+
+$1 \le n, m \le 10^5$
+
+时限：750 毫秒。
+
+---
+
+## 分块
+
+![h:250 center](range_inversion_query.svg)
+
+记号 $\tau(l, r)$：组列 $a_l, a_{l+1}, \dots, a_{r-1}$ 的逆序数。
+
+如上图所示，我们有
+$$
+\tau(l, r) = \tau(l, \red{j}B) + \tau(\red{i}B, r) - \tau(\red{i}B, \red{j}B) + a[l,\red{i}B) 与 a[\red{j}B, r) 之间的逆序数.
+$$
+
+
+---
+
+## 预处理
+
+$f[j][\red{i}]$：$\tau(j, \red{iB})$。
+
+$g[\red{i}][j]$：$\tau(\red{i}B, j)$。
+
+
+$f[j][\red{i}] = f[j + 1][\red{i}] + (a_{j+1}, \dots, a_{\red{i}B-1}) 中小于 a_j$ 的项数。
+
+$g[\red{i}][j+1] = g[\red{i}][j] + (a_{\red{i}B}, \dots, a_{j-1}) 中大于 a_j$ 的项数。
