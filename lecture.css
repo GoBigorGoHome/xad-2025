@@ -348,7 +348,7 @@ img[alt~="center"] {
     padding: 2px 8px;
     border-radius: 6px 0px 8px;
 }
-
+/* todo: fix margin after topic-box*/
 .topic-box {
   border: 2px solid #ff9800;
   background-color: #fff3e0;
