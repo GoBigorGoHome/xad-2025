@@ -76,6 +76,20 @@ function getFolders() {
 
 // The build process
 
+// Check if any CSS file in the root folder changed
+const cssChanged = (() => {
+  try {
+    const changedFiles = execSync('git diff --name-only HEAD~1 HEAD')
+      .toString()
+      .split('\n');
+
+    // Look for any .css file that is in the root (no slashes in path)
+    return changedFiles.some(file => file.endsWith('.css') && !file.includes('/'));
+  } catch (e) {
+    return true; // Force build if git fails
+  }
+})();
+
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir);
 }
@@ -99,7 +113,7 @@ folders.forEach(folder => {
   const displayTitle = titleMatch ? titleMatch[1] : folder.replace(/-/g, ' ');
   const updatedDate = getLastUpdated(projectPath, 'slides.md');
 
-  if (!fs.existsSync(distSubDir) || hasFileChanged(slidesPath)) {
+  if (!fs.existsSync(distSubDir) || hasFileChanged(slidesPath) || cssChanged) {
     console.log(`\n🚀 Building ${isMarp ? '[Marp]' : '[Slidev]'}: ${displayTitle}`);
     fs.mkdirSync(distSubDir, { recursive: true });
 
