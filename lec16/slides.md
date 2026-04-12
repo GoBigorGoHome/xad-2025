@@ -308,3 +308,61 @@ $$
 - $1 \le a \le 10^9$
 - $0 \le k \le 2000$
 
+---
+
+<div class=question>
+
+计算 $\sum_{i=1}^{N} f(\lfloor N/i \rfloor)$.
+
+
+</div>
+
+
+
+---
+
+
+```cpp
+long long ans = 0;
+for (int i = 1; i <= N; ) {
+    int j = N / i;
+    int ni = N / j + 1;
+    ans += (ni - i) * f(j);
+    i = ni;
+}
+```
+
+---
+
+<div class=question>
+
+计算 $\sum_{i=1}^{N} i \cdot f(\lfloor N/i \rfloor)$.
+
+
+</div>
+
+---
+
+```cpp
+long long ans = 0;
+for (int i = 1; i <= N; ) {
+    int j = N / i;
+    int ni = N / j + 1;
+    ans += (i + ni - 1) * (ni - i) / 2 * f(j);
+    i = ni;
+}
+```
+
+---
+
+# 例题 余数求和
+
+[洛谷P2261](https://www.luogu.com.cn/problem/P2261)
+
+求 $\sum_{i=1}^{n} k \bmod i$.
+
+- $1 \le n, k \le 10^9$.
+
+---
+
+$k \bmod i = k - i \cdot \lfloor k / i \rfloor$.
