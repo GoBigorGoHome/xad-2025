@@ -8,6 +8,10 @@ title: 求和
 
 # 求和
 
+$\DeclareMathOperator{\lcm}{lcm}$
+$\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}$
+
+
 ---
 
 # 内容
@@ -107,27 +111,26 @@ $$
 ```cpp
 int mod;
 
-long long f(long long x, long long n) {
+int power_sum(long long x, long long n) {
     if (n == 0)
         return 0;
 
     if (n & 1)
-        return (1 + x * f(x, n - 1)) % mod;
+        return (1 + x * power_sum(x, n - 1)) % mod;
 
-    return (1 + x) * f(x * x % mod, n >> 1) % mod;
+    return (1 + x) * power_sum(x * x % mod, n >> 1) % mod;
 }
 ```
 
 ---
 
-# 非递归写法
+## 非递归写法
 
 ```cpp
-int mod;
-long long f(long long x, long long n) {
+int power_sum(long long x, long long n, int mod) {
     long long ans = 0;
     long long prod = 1;
-    // 答案 == ans + prod * f(x, n)
+    // 答案 == ans + prod * power_sum(x, n)
     while (n) {
         if (n & 1) {
             ans = (ans + prod) % mod;
@@ -151,6 +154,65 @@ long long f(long long x, long long n) {
 
 - $1 \le A, B \le 10^{18}$
 - $2 \le M \le 10^9$
+
+---
+
+# 分析
+
+我们知道 $\lcm(x, y) = {xy\over \gcd(x, y)}$，考虑 $\gcd(x, y)$。
+
+我们把十进制写法是 $n$ 个 $1$ 的整数记作 $f(n)$，那么 $x = f(A), y = f(B)$。
+
+注意到
+$$\gcd(f(A), f(B)) = f(\gcd(A, B)).$$
+
+
+设 $d = \gcd(A, B)$，又设 $A = kd$。
+
+注意到
+$$f(kd) / f(d) = 1 + 10^d + (10^d)^2 + \dots + (10^d)^{k-1}.$$
+
+所以问题就归结为计算两个等比数列的和。
+
+
+---
+
+```cpp
+int power(int x, long long n, int mod) {
+    int ans = 1;
+    while (n > 0) {
+        if (n & 1)
+            ans = (long long) ans * x % mod;
+        x = (long long) x * x % mod;
+        n >>= 1;
+    }
+    return ans;
+}
+
+int power_sum(int x, long long n, int mod) {
+   int ans = 0;
+   int prod = 1;
+   while (n > 0) {
+        if (n & 1) {
+            ans = (ans + prod) % mod;
+            prod = (long long) prod * x % mod;
+        }
+        prod = (long long) prod * (1 + x) % mod;
+        x = (long long) x * x % mod;
+        n >>= 1;
+   }
+   return ans;
+}
+
+int main() {
+    long long a, b;
+    int m;
+    cin >> a >> b >> m;
+    long long d = __gcd(a, b);
+    int ans = (long long) power_sum(power(10, d, m), a / d, m) * power_sum(10, b, m) % m;
+    cout << ans << '\n';
+}
+```
 
 ---
 
@@ -277,12 +339,14 @@ $$
 
 ---
 
+
 <div class=proposition>
 
-$f_0^{k} = 0$。对于 $n \ge 1$，有
+$f_0^{k}(x) = 0$。
 
+对于 $n \ge 1$，有
 $$
-f_n^{k} = 
+f_n^{k}(x) = 
 \begin{cases}
 
 2^k (1 + x) f_{n/2}^{k}(x^2) + x \sum_{t = 0}^{k-1} {k \choose t} 2^{t} \cdot f_{n/2}^{t}(x^2), \quad & \text{$n$ 是偶数} \\
@@ -298,6 +362,29 @@ $$
 
 ---
 
+
+$$
+f_n^{k}(x) = 
+\begin{cases}
+2^k (1 + x) f_{n/2}^{k}(x^2) + x \sum_{t = 0}^{k-1} {k \choose t} 2^{t} \cdot f_{n/2}^{t}(x^2), \quad & \text{$n$ 是偶数} \\
+
+0^k + x \sum_{t=0}^{k} {k \choose t} f_{n-1}^{t}(x), \quad & \text{$n$ 是奇数}
+\end{cases}
+$$
+我们可以把上面的式子看作一个**递推式**：
+
+- 若 $n$ 是偶数，我们由 $f_{n/2}^0(x^2), f_{n/2}^{1}(x^2), \dots, f_{n/2}^{k}(x^2)$ 推出 $f_{n}^{k}(x)$。
+- 若 $n$ 是奇数，我们由 $f_{n-1}^0(x), f_{n-1}^{1}(x), \dots, f_{n-1}^{k}(x)$ 推出 $f_{n}^{k}(x)$。
+
+更进一步，我们也可以说
+- 若 $n$ 是偶数，我们由 $f_{n/2}^0(x^2), f_{n/2}^{1}(x^2), \dots, f_{n/2}^{k}(x^2)$ 推出 $f_{n}^{0}(x), f_{n}^{1}(x), \dots, f_{n}^{k}(x)$。
+- 若 $n$ 是奇数，我们由 $f_{n-1}^0(x), f_{n-1}^{1}(x), \dots, f_{n-1}^{k}(x)$ 推出 $f_{n}^{0}(x), f_{n}^{1}(x), \dots, f_{n}^{k}(x)$。
+
+总之，利用上面的式子，我们可以在 $O(k^2)$ 的时间内，由一个长为 $k+1$ 的序列推出另一个长为 $k+1$ 的序列。
+
+
+---
+
 # 例题 数列求和
 
 [洛谷P4948](https://www.luogu.com.cn/problem/P4948)
@@ -309,6 +396,77 @@ $$
 - $0 \le k \le 2000$
 
 ---
+
+## 递归写法
+
+```cpp
+const int mod = 1e9 + 7;
+const int maxk = 2005;
+int C[maxk][maxk]; // 组合数
+int p2[maxk]; // p2[i]：2的i次方
+int k;
+
+vector<long long> solve(int x, long long n) { //返回一个长度是 k + 1 的数组
+    vector<long long> ans(k + 1);
+    if (n == 0)
+        return ans;
+    if (n & 1) {
+        auto f = solve(x, n - 1);
+        for (int i = 0; i <= k; i++) {
+            for (int j = 0; j <= i; j++)
+                ans[i] += C[i][j] * f[j] % mod;
+            ans[i] = ans[i] % mod * x;
+        }
+        ans[0]++;
+        for (int i = 0; i <= k; i++)
+            ans[i] %= mod;
+        return ans;
+    }
+    auto f = solve((long long) x * x % mod, n / 2);
+    for (int i = 0; i <= k; i++) {
+        for (int j = 0; j < i; j++)
+            ans[i] += f[j] * C[i][j] % mod * p2[j] % mod;
+        ans[i] = (ans[i] % mod * x + (f[i] * p2[i] % mod * (1 + x) % mod)) % mod;
+    }
+    return ans;
+}
+```
+
+---
+
+```cpp
+int main() {
+    long long n;
+    int a;
+    cin >> n >> a >> k;
+    for (int i = 0; i <= k; i++) {
+        C[i][0] = 1;
+        for (int j = 1; j <= i; j++)
+            C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % mod;
+    }
+
+    p2[0] = 1;
+    for (int i = 1; i <= k; i++)
+        p2[i] = p2[i - 1] * 2 % mod;
+
+    long long ans = solve(a, n + 1)[k];
+
+    if (k == 0) {
+        ans--;
+        if (ans < 0)
+            ans += mod;
+    }
+    cout << ans << '\n';
+}
+```
+
+---
+
+## 非递归写法
+
+---
+
+# 数论分块
 
 <div class=question>
 
@@ -365,4 +523,23 @@ for (int i = 1; i <= N; ) {
 
 ---
 
-$k \bmod i = k - i \cdot \lfloor k / i \rfloor$.
+## 分析
+
+注意到 
+$$
+k \bmod i = k - i \cdot \floor{k / i},
+$$
+于是
+$$
+\sum_{i=1}^{n} k \bmod i = \sum_{i=1}^{n} k - i \cdot \floor{k / i} = n(n+1)/2 - \sum_{i=1}^{n} i \cdot \floor{k / i}.
+$$
+
+---
+
+# 扩展
+
+<div class=question>
+
+给定二元函数 $f$，计算 $\sum_{i=1}^{n} f(\floor{n/i}, \floor{m/i})$。
+
+</div>
