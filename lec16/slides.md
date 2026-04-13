@@ -220,12 +220,15 @@ int main() {
 
 <div class=question>
 
-对于非负整数 $n, k$，考虑多项式 $f_{n}^{k}(X) = \sum_{i=0}^{n-1} i^k X^i$。
-
-给定整数 $x$ 和正整数 $M$，求 $f_n^k(x) \bmod M$。
+给定非负整数 $N, K$，整数 $A$ 和正整数 $M$，求 $\sum_{i=0}^{N-1} i^K A^i$，模 $M$。
 
 </div>
 
+---
+
+对于非负整数 $n, k$，考虑多项式 $f_{n}^{k}(x) = \sum_{i=0}^{n-1} i^k x^i$。
+
+我们要求的就是 $f_N^K(A) \bmod M$。
 
 ---
 
@@ -463,6 +466,56 @@ int main() {
 ---
 
 ## 非递归写法
+
+仿照前面的等比数列求和的非递归写法，我们维护一列系数 $w_0, w_1, \dots, w_K$ 以及三个变量 $s$、$x$、$n$，使得等式
+$$
+f_{N}^{K}(A) = s + \sum_{i=0}^{K} w_i \cdot f_{n}^{i}(x)
+$$
+总是成立。
+
+一开始 $s = 0$，$x= A$，$n = N$，$w_K = 1$，$w_0, w_1, \dots, w_{K-1}$ 都是 $0$。
+
+最后，$n$ 变成 $0$ 而 $s$ 就是所求的 $f_N^K(A)$。
+
+---
+
+当 $n$ 是奇数时，我们有
+$$
+\begin{aligned}
+s + \sum_{i=0}^{K} w_i \cdot f_{n}^{i}(x) &= s + \sum_{i=0}^{K} w_i \cdot (0^i + x\sum_{j=0}^{i} {i \choose j} f_{n-1}^{j}(x)) \\
+&= s + w_0 + \sum_{i=0}^{K} w_i \cdot (x\sum_{j=0}^{i} {i\choose j} f_{n-1}^{j}(x)) \\
+&= s + w_0 + x\sum_{i=0}^{K} w_i \sum_{j=0}^{i} {i\choose j} f_{n-1}^{j}(x) \\
+&= s + w_0 + x\sum_{j=0}^{K} f_{n-1}^{j} \sum_{i=j}^{K} w_i {i \choose j}\\
+\end{aligned}
+$$
+<div class=topic-box>
+
+$n \gets n - 1$；$x$ 不变；$s \gets s + w_0$；$w_j \gets x\sum_{i=j}^{K} w_i {i \choose j}$。
+
+</div>
+
+---
+
+当 $n$ 是偶数时，我们有
+$$
+\begin{aligned}
+s + \sum_{i=0}^{K} w_i \cdot f_{n}^{i}(x) &= s + \sum_{i=0}^{K} w_i \cdot(2^i \cdot f_{n/2}^{i}(x^2) + x \sum_{j = 0}^{i} {i \choose j} 2^{j} \cdot f_{n/2}^{j}(x^2)) \\
+
+&= s + \sum_{j=0}^{K} f_{n/2}^{j}(x^2) \cdot 2^j( w_j + x \sum_{i = j}^{K} {i \choose j} w_i) \\
+\end{aligned}
+$$
+
+<div class=topic-box>
+
+$n \gets n / 2$；$s$ 不变；$w_j \gets 2^j( w_j + x \sum_{i = j}^{K} {i \choose j} w_i)$；$x\gets x^2$。
+
+</div>
+
+---
+
+```cpp
+
+```
 
 ---
 
