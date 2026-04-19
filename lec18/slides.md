@@ -84,7 +84,7 @@ $$\pmatrix{a_1 \\ a_2 \\ \vdots \\ a_n}$$
 
 <div class=definition>
 
-若 $\bs{A} = (a_{ij})_{\substack{1 \le i \le m \\ 1 \le j \le n}}$，$\bs{B} = (b_{jk})_{\substack{1 \le j \le n \\ 1 \le k \le r}}$，则 $\bs{AB} = (c_{ik})_{\substack{1 \le i \le m \\ 1 \le j \le r}}$，其中
+若 $\bs{A} = (a_{ij})_{\substack{1 \le i \le m \\ 1 \le j \le n}}$，$\bs{B} = (b_{jk})_{\substack{1 \le j \le n \\ 1 \le k \le r}}$，则 $\bs{AB} = (c_{ik})_{\substack{1 \le i \le m \\ 1 \le k \le r}}$，其中
 $$
 c_{ik} := \sum_{j = 1}^{n} a_{ij} b_{jk} = \underset{\scriptsize\text{第 $i$ 行}}{\pmatrix{a_{i1} & \dots & a_{in}}}
 \underset{\scriptsize\text{第 $k$ 列}}{\pmatrix{b_{1k} \\ \vdots \\ b_{nk}}}.
@@ -303,6 +303,6 @@ $$
 
 例如，当 $k = 2$ 时，有
 $$
-\bs{v}_{n+1} = \bs{v}_n \pmatrix{1 & 0 & 0 & 0\\ 0 & 1 & 1 & 1 \\ 0 & 0 & 1 & 2 \\ 1 & 0 & 0 & 1} 
+\bs{v}_{n+1} = \bs{v}_n \pmatrix{1 & 0 & 0 & 0\\ 0 & 1 & 1 & 1 \\ 0 & 0 & 1 & 2 \\ 1 & 0 & 0 & 1}.
 $$
 
