@@ -11,7 +11,7 @@ using namespace std;
 const int mod = 1e9 + 7;
 const int maxk = 2005;
 int C[maxk][maxk]; // 组合数
-int p2[maxk]; // 二的幂
+int p2[maxk]; // 2的幂
 
 // 非递归写法
 int solve(int x, long long n, int k) {

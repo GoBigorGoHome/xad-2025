@@ -16,7 +16,7 @@ $\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}$
 
 # 内容
 
-等比数列求和极其扩展
+等比数列求和及其扩展
 
 数论分块
 
@@ -26,17 +26,20 @@ $\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}$
 
 <div class=question>
 
-
-
-对于非负整数 $n$，考虑多项式 $f_n(X) := 1 + X + X^2 + \dots + X^{n-1}$。
-特别的，$f_0(x) = 0$。
-
-给定整数 $x$ 和正整数 $M$，求 $f_n(x) \bmod M$。
-
+给定整数 $A$，正整数 $N, M$，求 $1 + A + A^2 + \dots + A^{N-1}$，模 $M$。
 </div>
 
-* $f_n(x) = {x^{n} - 1 \over x - 1}$，如果 $(x - 1)$ 和 $M$ 互素，那么 $(x - 1)$ 在模 $M$ 下有乘法逆元。
-* 以下我们考虑一般情况，即 $(x - 1)$ 和 $M$ 未必互素。
+---
+
+<div class=definition>
+
+对于非负整数 $n$，考虑多项式 $f_n(x) := 1 + x + x^2 + \dots + x^{n-1}$。
+特别的，$f_0(x) = 0$。
+</div>
+
+我们要求的就是 $f_N(A) \bmod M$。
+* $f_N(A) = {A^{N} - 1 \over A - 1}$，如果 $(A - 1)$ 和 $M$ 互素，那么 $(A - 1)$ 在模 $M$ 下有乘法逆元。
+* 以下我们考虑一般情况，即 $(A - 1)$ 和 $M$ 未必互素。
 
 
 ---
@@ -562,6 +565,110 @@ int main() {
 
 ---
 
+# 例题 数学作业
+
+对于正整数 $n$，定义 Concatenate($n$) 为，把 $1, 2, \dots, n$ 依次连接起来得到的数。
+
+例如 Concatenate($13$) = $12345678910111213$。
+
+给定正整数 $N, M$，求 Concatenate($N$) $\bmod M$。
+
+- $1 \le N \le 10^{18}$，$1 \le M \le 10^9$。
+
+
+---
+
+对于正整数 $l, r$（$l \le r$），我们把依次连接 $l, l + 1, \dots, r$ 所得的数记作 $f(l, r)$。那么 Concatenate($n$) 就是 $f(1, n)$。
+
+如果 $l, r$ 在十进制下都是 $k$ 位数，那么 $f(l, r)$ 可表为
+$$
+\sum_{i=l}^{r} i \cdot 10^{k(r - i)}.
+$$
+做指标变换，令 $j = r - i$，把上式写成
+$$
+\sum_{j=0}^{r - l} (r - j)\cdot 10^{kj}  = r \sum_{j=0}^{r-l} (10^k)^j - \sum_{j=0}^{r-l} j \cdot (10^k)^j.
+$$
+
+---
+
+## 模板
+
+```cpp
+int k_power_sum(int x, long long n, int k, int mod) {
+    vector<vector<int>> C(k + 1, vector<int>(k + 1));
+    for (int i = 0; i <= k; i++) {
+        C[i][0] = 1;
+        for (int j = 1; j <= i; j++)
+            C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % mod;
+    }
+    vector<int> p2(k + 1);
+    p2[0] = 1;
+    for (int i = 1; i <= k; i++)
+        p2[i] = p2[i - 1] * 2 % mod;
+
+    vector<long long> w(k + 1);
+    w[k] = 1;
+    long long s = 0;
+    // 循环不变量：答案 == ans + \sum_{i=0..k} w[i] * f_{n,k}(x)
+    while (n > 0) {
+        if (n & 1) {
+            s += w[0];
+            for (int i = 0; i <= k; i++) {
+                for (int j = i + 1; j <= k; j++)
+                    w[i] += w[j] * C[j][i] % mod;
+                w[i] = w[i] % mod * x % mod;
+            }
+        }
+        for (int i = 0; i <= k; i++) {
+            long long t = 0;
+            for (int j = i; j <= k; j++)
+                t += C[j][i] * w[j] % mod;
+            w[i] = (w[i] + t % mod * x) % mod * p2[i] % mod;
+        }
+        x = (long long) x * x % mod;
+        n >>= 1;
+    }
+    return s % mod;
+}
+```
+
+---
+
+```cpp
+int power(long long x, unsigned long long n, int mod) {
+    long long ans = 1;
+    while (n > 0) {
+        if (n & 1)
+            ans = ans * x % mod;
+        x = x * x % mod;
+        n >>= 1;
+    }
+    return (int) ans;
+}
+
+int main() {
+    unsigned long long n;
+    int m;
+    cin >> n >> m;
+    n++;
+    long long ans = 0;
+    int len = 1;
+    for (unsigned long long l = 1; l < n; l *= 10) {
+        unsigned long long r = min(l * 10, n);
+        long long t = (r - 1) % m * k_power_sum(l * 10 % m, r - l, 0, m) % m - k_power_sum(l * 10 % m, r - l, 1, m);
+        ans = ans * power(10, len * (r - l), m) % m + t;
+        len++;
+    }
+    ans %= m;
+    if (ans < 0)
+        ans += m;
+    cout << ans << '\n';
+}
+```
+
+---
+
+
 # 数论分块
 
 <div class=question>
@@ -627,8 +734,27 @@ k \bmod i = k - i \cdot \floor{k / i},
 $$
 于是
 $$
-\sum_{i=1}^{n} k \bmod i = \sum_{i=1}^{n} k - i \cdot \floor{k / i} = n(n+1)/2 - \sum_{i=1}^{n} i \cdot \floor{k / i}.
+\sum_{i=1}^{n} k \bmod i = \sum_{i=1}^{n} k - i \cdot \floor{k / i} = nk - \sum_{i=1}^{n} i \cdot \floor{k / i}.
 $$
+
+---
+
+```cpp
+int main() {
+    int n, k;
+    cin >> n >> k;
+    long long ans = (long long) n * k;
+    for (int i = 1; i <= n;) {
+        if (i > k)
+            break;
+        int j = k / i;
+        int ni = min(n, k / j) + 1;
+        ans -= (long long) (i + ni - 1) * (ni - i) / 2 * j;
+        i = ni;
+    }
+    cout << ans - sum << '\n';
+}
+```
 
 ---
 
@@ -639,3 +765,6 @@ $$
 给定二元函数 $f$，计算 $\sum_{i=1}^{n} f(\floor{n/i}, \floor{m/i})$。
 
 </div>
+
+---
+
