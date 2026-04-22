@@ -16,9 +16,9 @@ $\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}$
 
 # 内容
 
-等比数列求和及其扩展
-
-数论分块
+- 等比数列求和及其扩展
+- 数论分块
+- 对倍数求和
 
 ---
 
@@ -768,3 +768,272 @@ int main() {
 
 ---
 
+# 对倍数求和
+
+---
+
+# 例题 Couting Rhyme
+
+[codeforces 1884D](https://codeforces.com/problemset/problem/1884/D)
+
+给你整数序列 $a_1, a_2, \dots, a_n$。
+求满足下列条件的整数对 $(i, j)$ 的数量。
+- $1 \le i < j \le n$
+- 不存在整数 $k$（$1 \le k \le n$）使得 $a_k$ 整除 $a_i$ 且 $a_k$ 整除 $a_j$。
+
+
+$1 \le n \le 10^6$，$1 \le a_i \le n$。
+多组数据，$n$ 的总和不超过 $10^6$。
+
+---
+
+对每个 $d = 1, \dots, n$ 定义
+- $f(d) \coloneqq$ 满足 $\gcd(a_i, a_j) = d$ 的 $(i, j)$ 有多少对。
+
+对每个 $x = 1, \dots, n$ 定义
+- $\mathrm{div}(x) \coloneqq$ $a_1, \dots, a_n$ 中有多少项是 $x$ 的因数。
+
+答案就是
+$$
+\sum_{d = 1}^{n} f(d) [\mathrm{div(d) = 0}].
+$$
+
+---
+
+现在考虑如何计算 $f(d)$。
+先放松限制，对每个 $d = 1, \dots, n$ 定义
+- $g(d) \coloneqq$ 满足 $d \mid a_i$ 且 $d \mid a_j$ 的 $i, j$ 有多少对。
+
+也就是说，把条件从「$d$ 是 $a_i$ 和 $a_j$ 的**最大公因数**」放松为「$d$ 是 $a_i$ 和 $a_j$ 的**公因数**」。
+
+我们有
+$$
+f(d) = g(d) - \sum_{k=2}^{\floor{n/d}} f(k\cdot d).
+$$
+
+---
+
+对每个 $d = 1, \dots, n$ 定义
+- $\mathrm{mul}(d)\coloneqq$ $a_1, \dots, a_n$ 中有多少项是 $d$ 的倍数。
+
+于是有
+$$
+g(d) = {\mathrm{mul}(d) \choose 2}.
+$$
+
+---
+
+对每个 $x = 1, \dots, n$ 定义
+- $\mathrm{cnt}(x) \coloneqq$ $a_1, \dots, a_n$ 中有多少项等于 $x$。
+
+那么
+$$
+\mathrm{mul}(x) = \sum_{k=1}^{\floor{n/x}} \mathrm{cnt}(k\cdot x).
+$$
+而
+$$
+\mathrm{div}(x) = \sum_{d \mid x} \mathrm{cnt}(d).
+$$
+二者都可以通过枚举倍数来计算。
+
+---
+
+```cpp
+int main() {
+    int T; cin >> T;
+    while (T--) {
+        int n; cin >> n;
+        vector<int> cnt(n + 1);
+        vector<int> mul(n + 1);
+        vector<int> div(n + 1);
+        for (int i = 0; i < n; i++) {
+            int x; cin >> x;
+            cnt[x]++;
+        }
+        for (int i = 1; i <= n; i++)
+            for (int j = i; j <= n; j += i)
+                mul[i] += cnt[j];
+
+        for (int i = 1; i <= n; i++)
+            for (int j = i; j <= n; j += i)
+                div[j] += cnt[i];
+
+        vector<long long> f(n + 1);
+
+        long long ans = 0;
+        for (int  i = n; i >= 1; i--) {
+            f[i] = (long long) mul[i] * (mul[i] - 1) / 2;
+            for (int j = 2 * i; j <= n; j += i)
+                f[i] -= f[j];
+            if (div[i] == 0)
+                ans += f[i];
+        }
+        cout << ans << '\n';
+    }
+}
+```
+
+---
+
+我们知道 
+$$\sum_{i=1}^{n} {1\over i} = O(\ln n).$$
+所以上述解法的时间是 $O(n \log n)$。
+
+---
+
+# 例题 GCD 卷积
+
+https://judge.yosupo.jp/problem/gcd_convolution
+
+给定整数序列 $a_1,\dots, a_N$ 和 $b_1, \dots, b_N$，计算序列 $c_1, \dots, c_N$，定义如下
+$$
+c_k = (\sum_{\gcd(i, j) = k} a_i b_j) \bmod 998244353.
+$$
+
+- $1 \le N \le 10^6$
+- $0 \le a_i, b_i < 998244353$
+
+---
+
+一如上一题的思路，我们有
+
+$$
+c_k = \sum_{k 是 i,j 公因数} a_i b_j - \sum_{t = 2}^{\floor{n/k}} c_{tk}.
+$$
+而
+$$
+\sum_{k 是 i,j 公因数} a_i b_j = (\sum_{k \mid i} a_i) (\sum_{k \mid j} b_j) = (\sum_{t=1}^{\floor{n/k}}a_{tk}) (\sum_{t=1}^{\floor{n/k}} b_{tk}).
+$$
+
+---
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n; cin >> n;
+    vector<int> a(n + 1), b(n + 1);
+    for (int i = 1; i <= n; i++)
+        cin >> a[i];
+    for (int i = 1; i <= n; i++)
+        cin >> b[i];
+
+    const int mod = 998244353;
+    vector<long long> c(n + 1);
+    for (int i = n; i >= 1; i--) {
+        long long sa = 0, sb = 0;
+        for (int j = i; j <= n; j += i) {
+            sa += a[j];
+            sb += b[j];
+        }
+        c[i] = (sa % mod) * (sb % mod);
+        for (int j = 2 * i; j <= n; j += i) {
+            c[i] -= c[j];
+        }
+        c[i] %= mod;
+        if (c[i] < 0)
+            c[i] += mod;
+    }
+    for (int i = 1; i <= n; i++)
+        cout << c[i] << ' ';
+    cout << '\n';
+}
+```
+
+---
+
+# 例题 LCMs
+
+[agc038c](https://atcoder.jp/contests/agc038/tasks/agc038_c)
+
+给定长为 $N$ 的整数序列 $A_0, A_1, \dots, A_{N-1}$。求
+$$
+\sum_{i=0}^{N-2} \sum_{j=i+1}^{N-1} \lcm(A_i, A_j).
+$$
+$\lcm(a, b)$ 表示 $a$ 和 $b$ 的最小公倍数。
+
+由于答案可能很大，输出它除以 $998244353$ 的余数。
+
+- $1 \le N \le 200000$
+- $1 \le A_i \le 10^6$
+
+---
+
+我们知道 $\lcm(A_i, A_j) = {A_i A_j \over \gcd(A_i, A_j)}$。
+
+对于每个 $d = 1, 2, \dots, 10^6$，我们计算
+$$
+f(d) := \sum_{\substack{0 \le i < j \le N-1 \\ \gcd(A_i, A_j) = d}} A_i A_j.
+$$
+那么答案就是
+$$
+\sum_{d = 1}^{10^6} f(d) / d.
+$$
+一如前两题的套路，我们有
+$$
+f(d) = \sum_{\substack{0 \le i < j \le N-1 \\ d \mid A_i\ 且\ d \mid A_j}} A_i A_j - \sum_{t=2}^{\floor{10^6/d}} f(td).
+$$
+
+---
+
+现在考虑如何计算 $\sum_{\substack{0 \le i < j \le N-1 \\ d \mid A_i\ 且\ d \mid A_j}} A_i A_j$。有不止一种计算方法。
+不难看出它等于
+$$
+{1\over 2}(\sum_{\substack{0 \le i,j \le N-1 \\ d \mid A_i\ 且\ d \mid A_j}} A_i A_j - \sum_{\substack{0 \le i \le N-1 \\ d \mid A_i}} A_i^2)
+$$
+即
+$$
+{1\over 2}((\sum_{\substack{0 \le i \le N-1 \\ d \mid A_i}} A_i)^2 - \sum_{\substack{0 \le i \le N-1 \\ d \mid A_i}} A_i^2).
+$$
+
+---
+
+对每个 $x = 1, 2, \dots, 10^6$，定义
+- $\mathrm{cnt}(x)$：$A_0, \dots, A_{N-1}$ 中有多少项等于 $x$。
+
+那么
+$$
+\sum_{\substack{0 \le i \le N-1 \\ d \mid A_i}} A_i = \sum_{\substack{1 \le x \le 10^6 \\ d \mid x}} \mathrm{cnt}(x) \cdot x,
+$$
+而
+$$
+\sum_{\substack{0 \le i \le N-1 \\ d \mid A_i}} A_i^2 = \sum_{\substack{1 \le x \le 10^6 \\ d \mid x}} \mathrm{cnt}(x) \cdot x^2.
+$$
+
+---
+
+```cpp
+int main() {
+    int n; cin >> n;
+    const int maxv = 1e6;
+    vector<int> cnt(maxv + 1);
+    for (int i = 0; i < n; i++) {
+        int x; cin >> x;
+        cnt[x]++;
+    }
+    const int mod = 998244353;
+    vector<int> inv(maxv + 1); //递推法计算逆元
+    inv[1] = 1;
+    for (int i = 2; i <= maxv; i++)
+        inv[i] = (long long) (mod - mod / i) * inv[mod % i] % mod;
+    long long ans = 0;
+    vector<long long> f(maxv + 1);
+    for (int d = maxv; d >= 1; d--) {
+        long long sum = 0;
+        long long sum2 = 0;
+        for (int x = d; x <= maxv; x += d) {
+            sum += (long long) cnt[x] * x;
+            sum2 += (long long) cnt[x] * x * x;
+        }
+        sum %= mod;
+        f[d] = (sum * sum - sum2) % mod * inv[2] % mod; 
+        for (int i = 2 * d; i <= maxv; i += d)
+            f[d] -= f[i];
+        f[d] %= mod;
+        ans += f[d] * inv[d] % mod;
+    }
+    ans %= mod;
+    if (ans < 0) ans += mod;
+    cout << ans << '\n';
+}
+```
