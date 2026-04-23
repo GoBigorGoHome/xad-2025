@@ -19,6 +19,7 @@ $\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}$
 - 等比数列求和及其扩展
 - 数论分块
 - 对倍数求和
+- 对子集求和
 
 ---
 
@@ -682,6 +683,74 @@ int main() {
 
 ---
 
+## 分析
+
+- 当 $1 \le i \le \floor{\sqrt{N}}$ 时，$\floor{N/i}$ 最多取 $\floor{\sqrt{N}}$ 个值。
+这时 $\floor{N/i}$ 确实取 $\floor{\sqrt{N}}$ 个值。当 $i + 1 \le \sqrt{N}$ 时，有
+    $$
+    N/i - N/(i+1) = N/(i(i+1)) > 1.
+    $$
+    所以
+    $$\floor{N/i} > \floor{N/(i + 1)}.$$
+- 当 $\floor{\sqrt{N}} + 1 \le i \le N$ 时，有 $1 \le N/i < \sqrt{N}$。此时 $\floor{N/i}$ 最多取 $\floor{\sqrt{N}}$ 个值。
+
+综上可得 $\floor{N/i}$ 的值不超过 $2\floor{\sqrt{N}}$ 个。
+
+---
+
+## 例子
+
+$N = 15$
+$$
+\begin{array}{|c|c|}
+\hline
+i & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & \dots & 15\\
+\hline
+\floor{N/i} & 15 & 7 & 5 & 3 & 3 & 2 & 2 & 1 & \dots & 1\\
+\hline
+\end{array}
+$$
+
+$N=16$
+$$
+\begin{array}{|c|c|}
+\hline
+i & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & \dots & 16\\
+\hline
+\floor{N/i} & 16 & 8 & 5 & 4 & 3 & 2 & 2 & 2 & 1 & \dots & 1\\
+\hline
+\end{array}
+$$
+
+---
+
+<div class=proposition>
+
+对于正整数 $n$ 有 $\floor{n/\floor{\sqrt{n}}} > \floor{n/(\floor{\sqrt{n}} + 1)}$.
+</div>
+
+---
+
+
+<div class=proof>
+
+设 $k = \floor{\sqrt{n}}$，下面我们证明 $\floor{n/k} \ne \floor{n/(k+1)}$。我们有
+$$\begin{equation} 
+k^2 \le n < (k + 1)^2. \tag{$\star$}
+\end{equation} 
+$$
+把 $(\star)$ 写成 $k^2 \le n \le k^2 + 2k$，可见 $\floor{n/ k}$ 可能是 $k$，$k + 1$ 或 $k + 2$。
+而把 $(\star)$ 写成 $k^2 - 1 < n < (k + 1)^2$，又可见 $\floor{n/(k+1)}$ 可能是 $k-1$ 或 $k$。如果 $\floor{n/ k} = \floor{n/(k+1)}$，那只能是二者都等于 $k$。
+
+另一方面 
+$$
+\floor{n/(k+1)} = k \implies n/(k+1) \ge k \implies n/k \ge k+1 \implies \floor{n/k} \ge k+1.
+$$
+所以 $\floor{n/k}$ 和 $\floor{n/(k+1)}$ 都等于 $k$ 是不可能的。
+
+</div>
+
+---
 
 ```cpp
 long long ans = 0;
@@ -762,7 +831,8 @@ int main() {
 
 <div class=question>
 
-给定二元函数 $f$，计算 $\sum_{i=1}^{n} f(\floor{n/i}, \floor{m/i})$。
+给定二元函数 $f$ 和正整数 $n, m$ 满足 $n \le m \le 10^9$。计算
+$$\sum_{i=1}^{n} f(\floor{n/i}, \floor{m/i}).$$
 
 </div>
 
@@ -1037,3 +1107,12 @@ int main() {
     cout << ans << '\n';
 }
 ```
+
+---
+
+# 对子集求和
+
+
+
+---
+
