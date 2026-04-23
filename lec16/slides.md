@@ -10,7 +10,9 @@ title: 求和
 
 $\DeclareMathOperator{\lcm}{lcm}$
 $\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}$
-
+$\DeclareMathOperator{\bit}{bit}$
+$\newcommand{\bitand}{\mathbin{\&}}$
+$\newcommand{\bitor}{\mathbin{\mathrm{or}}}$
 
 ---
 
@@ -1112,7 +1114,293 @@ int main() {
 
 # 对子集求和
 
+<div class=question>
+
+设 $A$ 是一个 $n$ 元集合。$A$ 有 $2^n$ 个子集，它们构成的集合称为 $A$ 的**幂集**， 记作 $P(A)$。
+
+给定函数 $f: P(A) \to \mathbb{Z}$，定义函数 $F : P(A) \to \mathbb{Z}$ 如下
+$$
+F(S) := \sum_{T \subseteq S} f(T).
+$$
+对每个 $S\subseteq A$，求 $F(S)$。
+</div>
+
 
 
 ---
 
+不失一般性，取 $A = \set{1, 2, \dots, n}$。
+
+对于每个 $S \subseteq A$，我们把 $S$ 的子集进行分类。对每个 $i = 0, 1, \dots, n$，定义
+$$
+G(S, i) := \set{T \subseteq S : T 和 S 的差别只在前 i 个元素}
+$$
+所谓前 $i$ 个元素指的是 $1, \dots, i$。
+
+根据定义，我们有 $G(S, 0) = \set{S}$ 而 $G(S, n) = P(S)$。
+对于 $i \ge 1$，有递推式
+$$
+G(S, i) = \begin{cases}
+G(S, i-1), \quad & 若i \not\in S \\
+G(S, i-1) \sqcup G(S \setminus i, i), & 若 i \in S
+\end{cases}
+$$
+<div class=remark>
+
+- $\sqcup$ 表示无交并，也就是说 $X \sqcup Y$ 暗含着集合 $X,Y$ 不相交。
+- $S \setminus i$ 表示把从 $S$ 中去掉 $i$ 所得的集合。
+- $G(S \setminus i, i)$ 等于 $G(S \setminus i, i-1)$。
+
+</div>
+
+---
+
+对于每个 $S\subseteq \set{1, \dots, n}$ 和每个 $i = 0, \dots, n$，定义
+$$
+F(S, i) := \sum_{T \in G(s, i)} f(T).
+$$
+边界条件：$F(S, 0) = f(S)$。
+递推式
+$$
+F(S, i) = \begin{cases}
+F(S,i-1), & 若i \not\in S \\
+F(S,i-1) + F(S \setminus i, i), & 若 i \in S
+\end{cases}
+$$
+
+$F(S)$ 就是 $F(S, n)$。
+
+---
+
+为了编程的方便，我们通常取 $A = \set{0, 1, \dots, n-1}$，用整数 $s$ 表示 $A$ 的子集 $S$
+$$
+i \in S \iff s\ 的二进制第\ i\ 位是 1.
+$$
+
+对应
+$$
+\begin{array}   {|c|c|}\hline
+S \subseteq \set{0, \dots, n-1}  & 0 \le s \le 2^{n} -1\\ \hline
+T \subseteq S & t \bitand s = t\\ \hline
+S \cap T & s \bitand t \\ \hline
+S \cup T & s \bitor t \\ \hline
+S \setminus i & s \oplus 2^i \\ \hline
+\end{array}
+$$
+
+
+<!-- 可见 $0 \le s < 2^n$。这样，函数 $f$ 和 $F$ 就是长为 $2^n$ 的数组。
+
+对于每个 $s = 0, \dots, 2^{n} - 1$ 和每个 $i = 0, \dots, n$，定义
+$$
+G(s, i) := \set{t \bitand s = t : t 和 s只在前i个数位上不同}
+$$
+其中 $\bitand$ 表示按位与。
+
+根据定义，有 $G(s, 0) = \set{s}$。对于 $i = 0, \dots, n-1$，有递推式
+$$
+G(s, i+1) = \begin{cases}
+G(s,i), & 若 s 的第 i 位是 0 \\
+G(s,i) \sqcup G(s \oplus 2^i, i+1), & 若 s 的第 i 位是 1
+\end{cases}
+$$
+其中 $\oplus$ 表示按位异或。 -->
+
+
+
+---
+
+```cpp
+for (int s = 0; s < 1 << n; s++)
+    F[s] = f[s];
+
+for (int i = 0; i < n; i++)
+  for (int s = 0; s < 1 << n; s++)
+    if (s >> i & 1)
+      F[s] += F[s ^ (1 << i)];
+```
+时间：$O(n2^n)$。
+
+---
+
+# 例题 Compatible Numbers
+[Codeforces 165E](https://codeforces.com/contest/165/problem/E)
+
+称整数 $x$ 和 $y$ **相容**，如果 $x \bitand y = 0$. 例如 $90$（$1011010_2$）和 $36$（$100100_2$）相容，因为 $1011010_2 \bitand 100100_2 = 0$，而 $3$（$11_2$）和 $6$（$110_2$）不相容，因为 $11_2 \bitand 110_2 = 10_2$。
+
+给你 $n$ 个正整数 $a_1, \dots, a_n$，对于每个 $i = 1, \dots, n$，在 $a_1, \dots, a_n$ 中找出一个与 $a_i$ 相容的数，若不存在这样的数，输出 $-1$。
+
+- $1 \le n \le 10^6$
+- $1 \le a_i \le 4\times 10^6$
+
+---
+
+# 分析
+
+注意到 $4 \times 10^6 < 2^{22}$。
+
+$a_i$ 与 $a_j$ 相容也就是说 $a_j$ 是 $(2^{22} - 1) \oplus a_i$ 的子集。
+
+
+对于每个 $s = 0, \dots, 2^{22} - 1$，定义
+$$
+f(s) := \begin{cases}
+某个 a_i, &若存在 a_i 满足 a_i \subseteq s \\
+- 1, &若不存在 a_i 满足 a_i \subseteq s
+\end{cases}
+$$
+
+---
+
+```cpp
+int main() {
+    const int L = 22;
+    vector<int> f(1 << L, -1);
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+        f[a[i]] = a[i];
+    }
+    for (int i = 0; i < L; i++) {
+        for (int j = 0; j < 1 << L; j++) {
+            if (j >> i & 1 && f[j] == -1)
+                f[j] = f[j ^ (1 << i)];
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        cout << f[((1 << L) - 1) ^ a[i]] << ' ';
+    }
+    cout << '\n';
+}
+```
+
+---
+
+# 例题 Vowels
+
+[Codeforces 383E](https://codeforces.com/contest/383/problem/E)
+
+集合 $A$ 由前 24 个小写英文字母，a 到 x，构成。
+给你 $n$ 个长度为 3 的单词，每个单词也由 a 到 x 构成。
+
+对于 $A$ 的每个子集 $S$（一共 $2^{24}$ 个子集），定义
+- $\mathrm{cnt}(S)$：$n$ 个单词中，有多少个单词至少包含一个 $S$ 中的字母。
+约定 $\mathrm{cnt}(\varnothing) = n$。
+
+求 $(\mathrm{cnt}(S))^2$ 的异或和。
+
+$1 \le n \le 10^4$。
+
+---
+
+## 解法
+
+对于 $A$ 的每个子集 $S$，定义
+- $F(S)$：$n$ 个单词中，有多少个单词只含有 $S$ 中的字母。
+
+那么
+$$\mathrm{cnt}(S) = n - F(A \setminus S).$$
+
+又定义
+- $f(S)$：$n$ 个单词中，有多少个单词恰含有 $S$ 中的字母。
+
+那么
+$$
+F(S) = \sum_{T \subseteq S} f(T).
+$$
+
+---
+
+```cpp
+int main() {
+    const int L = 24;
+    vector<int> f(1 << L);
+    int n; cin >> n;
+    for (int i = 0; i < n; i++) {
+        string s; cin >> s;
+        int mask = 0;
+        for (char c : s)
+            mask |= 1 << (c - 'a');
+        f[mask]++;
+    }
+    for (int i = 0; i < L; i++)
+        for (int j = 0; j < 1 << L; j++)
+            if (j >> i & 1)
+                f[j] += f[j ^ 1 << i];
+    int ans = 0;
+    for (int x : f)
+        ans ^= (n - x) * (n - x);
+    cout << ans << '\n';
+}
+```
+
+---
+
+
+# 例题 Or Plus Max
+
+[arc100c](https://atcoder.jp/contests/arc100/tasks/arc100_c)
+
+给你一个长为 $2^N$ 的整数序列 $A_0, A_1, \dots, A_{2^N-1}$。
+
+对每个整数 $K = 1, 2, \dots, 2^{N}-1$，解决下述问题：
+- 设 $i, j$ 是整数。求 $\max \set{A_i + A_j : 0 \le i < j \le 2^N-1 \ 且 \ (i \bitor j) \le K}$，
+其中 $\bitor$ 表示按位或运算。
+
+$1 \le N \le 18$
+$1 \le A_i\le 10^9$
+
+---
+
+## 约定
+
+对每个 $K = 0, 1, \dots, 2^{N} - 1$，我们把
+- 设 $i, j$ 是整数。求 $\max \set{A_i + A_j : 0 \le i < j \le 2^N-1 \ 且 \ (i \bitor j) \le K}$，
+
+简称为问题 $K$。
+
+指标 $i$ 和 $j$ 的取值范围总是 $0$ 到 $2^{N}-1$，以下不再写出。
+
+---
+
+## 解法
+
+对每个 $x = 0, \dots, 2^{N}-1$，定义
+- $f(x) := \max\set{A_i + A_j : i < j \,且\, (i \cup j) \subseteq x}.$
+
+于是问题 $K$ 的答案就是 $\sum_{0 \le x \le K} f(x)$.
+
+注意到
+- 条件 $(i \cup j) \subseteq x$ 也就是 $i \subseteq x$ 且 $j \subseteq x$.
+
+更进一步，可见 
+- $f(x)$ 就是集合 $\set{A_i : i \subseteq x}$ 中第一大和第二大的两个数之和。
+
+---
+
+```cpp
+int main() {
+    int n; cin >> n;
+    vector<pair<int,int>> f(1 << n);
+    for (int i = 0; i < 1 << n; i++)
+        cin >> f[i].first;
+
+    for (int i = 0; i < n; i++)
+        for (int s = 0; s < 1 << n; s++)
+            if (s >> i & 1) {
+                auto [v1, v2] = f[s];
+                auto [v3, v4] = f[s ^ (1 << i)];
+                vector<int> t = {v1, v2, v3, v4};
+                sort(t.rbegin(), t.rend());
+                f[s] = {t[0], t[1]};
+            }
+
+    int ans = 0;
+    for (int k = 1; k < 1 << n; k++) {
+        ans = max(ans, f[k].first + f[k].second);
+        cout << ans << '\n';
+    }
+}
+```
