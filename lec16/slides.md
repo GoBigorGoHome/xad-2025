@@ -968,11 +968,11 @@ $$
 一如上一题的思路，我们有
 
 $$
-c_k = \sum_{k 是 i,j 公因数} a_i b_j - \sum_{t = 2}^{\floor{n/k}} c_{tk}.
+c_k = \sum_{k 是 i,j 的公因数} a_i b_j - \sum_{t = 2}^{\floor{n/k}} c_{tk}.
 $$
 而
 $$
-\sum_{k 是 i,j 公因数} a_i b_j = (\sum_{k \mid i} a_i) (\sum_{k \mid j} b_j) = (\sum_{t=1}^{\floor{n/k}}a_{tk}) (\sum_{t=1}^{\floor{n/k}} b_{tk}).
+\sum_{k 是 i,j 的公因数} a_i b_j = (\sum_{k \mid i} a_i) (\sum_{k \mid j} b_j) = (\sum_{t=1}^{\floor{n/k}}a_{tk}) (\sum_{t=1}^{\floor{n/k}} b_{tk}).
 $$
 
 ---
