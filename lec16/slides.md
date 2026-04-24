@@ -1245,10 +1245,19 @@ $a_i$ 与 $a_j$ 相容也就是说 $a_j$ 是 $(2^{22} - 1) \oplus a_i$ 的子集
 对于每个 $s = 0, \dots, 2^{22} - 1$，定义
 $$
 f(s) := \begin{cases}
+s, &若存在 i 使得 a_i = s \\
+- 1, &若不存在 i 使得 a_i = s
+\end{cases}
+$$
+和
+$$
+F(s) := \begin{cases}
 某个 a_i, &若存在 a_i 满足 a_i \subseteq s \\
 - 1, &若不存在 a_i 满足 a_i \subseteq s
 \end{cases}
 $$
+
+用上述对子集求和的方法，可以从 $f$ 算出 $F$。
 
 ---
 
@@ -1359,7 +1368,7 @@ $1 \le A_i\le 10^9$
 对每个 $K = 0, 1, \dots, 2^{N} - 1$，我们把
 - 设 $i, j$ 是整数。求 $\max \set{A_i + A_j : 0 \le i < j \le 2^N-1 \ 且 \ (i \bitor j) \le K}$，
 
-简称为问题 $K$。
+称为问题 $K$。
 
 指标 $i$ 和 $j$ 的取值范围总是 $0$ 到 $2^{N}-1$，以下不再写出。
 
