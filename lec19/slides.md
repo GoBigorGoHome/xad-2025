@@ -641,7 +641,14 @@ int main() {
 
 # 方法三：DSU on Tree
 
-
+![center h:400](dsu_on_tree.svg)
 
 ---
+
+# 例题 树上数颜色
+
+[洛谷U41492](https://www.luogu.com.cn/problem/U41492)
+
+
+
 
