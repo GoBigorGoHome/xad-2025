@@ -641,7 +641,21 @@ int main() {
 
 # 方法三：DSU on Tree
 
-![center h:400](dsu_on_tree.svg)
+
+
+---
+
+
+![bg right:35% fit](dsu_on_tree.svg)
+
+有些子树求和问题不适合用前两种方法解决。
+其中一类问题是这样的
+- 给我们一个有根树。每个点上有一条信息。
+- 我们需要对每个子树求和，也就是把子树的每个点的信息汇总。
+- 我们想要的子树和可以这样来获得
+    - 准备一个空的数据结构 $S$。
+    - 把一个子树里的信息逐条的加到 $S$ 里。
+    - 利用 $S$ 查询子树和。
 
 ---
 
@@ -649,6 +663,145 @@ int main() {
 
 [洛谷U41492](https://www.luogu.com.cn/problem/U41492)
 
+给你一个有 $n$ 个点的有根树。点从 $1$ 到 $n$ 编号。点 $1$ 是根。每个点有个颜色，点 $i$ 的颜色是 $c_i$。
 
+回答 $m$ 个询问。每个询问给你一个点 $u$，问子树 $u$ 里有多少种不同的颜色。
+
+- $1 \le n \le 10^5$
+- $1 \le c_i, m \le n$
+
+---
+
+<div class=question>
+
+对每个点 $u$，求子树 $u$ 里有多少种颜色。
+</div>
+
+朴素的解法：
+- 使用一个长度为 $n$ 的数组 $\mathrm{cnt}[1], \dots,\mathrm{cnt}[n]$。最初每个 $\mathrm{cnt}[i]$ 都等于 $0$。
+- 对于子树 $u$ 里的每个点 $v$，给 $\mathrm{cnt}[c_v]$ 加一。同时维护出现的颜色种类数 $k$。
+- 记录子树 $u$ 的答案，也就是最后的 $k$。
+- 把 $\mathrm{cnt}$ 数组清空：对于子树 $u$ 里的每个点 $v$，把 $\mathrm{cnt}[c_v]$ 置为 $0$。把 $k$ 置为 $0$。
+
+时间是 $O(n^2)$。
+
+---
+
+
+在这个问题里，一个子树里的信息量可以用它的 size（即点的数量）来衡量。
+
+对上面的朴素解法，有这么一种优化。
+
+第一步：预处理
+- 求出每个子树的大小。
+- 对每个点 $u$ ，找出 $u$ 的孩子中 size 最大的那个，如果多个，任取一个。设它是 $v$。
+我们把 $v$ 称为 $u$ 的**重孩子**，把子树 $v$ 称为 $u$ 的**重子树**。其余孩子称为**轻孩子**，其余子树称为**轻子树**。
+
+![center h:250](heavy-light.svg)
+
+---
+
+![bg right fit](animate_dsu_on_tree.svg)
+
+我们把 $\mathrm{cnt}$ 数组和 $k$ 设置为全局变量，把二者统称为**全局数据结构**或**全局状态**。
+
+第二步：从根节点开始对树做一次 DFS。
+
+```cpp
+dfs(u):
+    对于 u 的每个轻孩子 v:
+        dfs(v)
+        清空全局状态
+    dfs(heavy[u])
+    把子树 u 的除了重子树之外的部分加入全局状态
+```
+
+DFS 的另一种写法
+
+```cpp
+dfs(u):
+    对于 u 的每个轻孩子 v:
+        dfs(v)
+    dfs(heavy[u])
+    把子树 u 的除了重子树之外的部分加入全局状态
+    if (u 不是重孩子)
+        清空全局状态
+```
+
+---
+
+
+<div class=columns>
+
+```cpp
+const int maxn = 1e5 + 5;
+vector<int> g[maxn];
+int sz[maxn], heavy_child[maxn];
+
+void get_size(int u, int p) {
+    sz[u] = 1;
+    for (int v : g[u])
+        if (v != p) {
+            get_size(v, u);
+            sz[u] += sz[v];
+            if (sz[heavy_child[u]] < sz[v])
+                heavy_child[u] = v;
+        }
+}
+```
+
+```cpp
+int cnt[maxn], nc; //全局数据结构
+int col[maxn];
+int ans[maxn];
+
+int preorder[maxn], num;
+
+void dfs(int u, int p, bool keep) {
+    int l = num;
+    preorder[num++] = u;
+    for (int v : g[u])
+        if (v != p && v != heavy_child[u])
+            dfs(v, u, false);
+    int r = num;
+    if (heavy_child[u])
+        dfs(heavy_child[u], u, true);
+    for (int i = l; i < r; i++)
+        nc += ++cnt[col[preorder[i]]] == 1;
+    ans[u] = nc;
+    if (!keep) {
+        for (int i = l; i < num; i++)
+            cnt[col[preorder[i]]] = 0;
+        nc = 0;
+    }
+}
+```
+
+</div>
+
+---
+
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n; cin >> n;
+    for (int i = 0; i < n - 1; i++) {
+        int u, v; cin >> u >> v;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+    for (int i = 1; i <= n; i++)
+        cin >> col[i];
+    get_size(1, 0);
+    dfs(1, 0, true);
+    int m; cin >> m;
+    while (m--) {
+        int u; cin >> u;
+        cout << ans[u] << '\n';
+    }
+}
+```
 
 
