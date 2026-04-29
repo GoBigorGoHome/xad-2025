@@ -60,15 +60,17 @@ $\DeclareMathOperator{\parent}{parent}$
 ---
 
 ![bg right:40% fit](树上差分原理.svg)
-把点 $u$ 的权值记作 $w_u$。
 
-我们可以把点 $u$ 的权值看作一种**子树和**。
-也就是说，有一个序列 $a = (a_1, \dots, a_N)$，对每个点 $u$ 都有
+考虑以点 $1$ 为根的**有根树**。
+我们可以把每个点的权值看作一种**子树和**。
+
+把点 $u$ 的权值记作 $w_u$。也就是说，有一个序列 $a = (a_1, \dots, a_N)$，对每个点 $u$ 都有
 $$
 w_u = \sum_{v在子树 u 内} a_v. 
-$$ 
-把从 $s$ 到 $t$ 的路径上的每个点的权值加 $1$，对序列 $a$ 的效果恰是
-- 给 $a_s$ 加 $1$，给 $a_t$ 加 $1$，给 $a_{\lca(s, t)}$ 减 $1$，给 $a_{\parent(\lca(s, t))}$ 减 $1$。
+$$
+我们把从 $s$ 到 $t$ 的路径分成两段来看，可见把此路径每个点的权值加 $1$，对序列 $a$ 的效果恰是
+- 给 $a_s$ 加 $1$，给 $a_{\parent(\lca(s, t))}$ 减 $1$。
+- 给 $a_t$ 加 $1$，给 $a_{\lca(s, t)}$ 减 $1$。
 
 我们把这个技巧称为**树上差分**。
 
@@ -302,12 +304,160 @@ int main() {
 # 方法二：把两个前缀和相减得到一个子树和
 
 前缀：有根树的先序遍历所得序列的前缀。
+![center h:500](两个前缀相减.svg)
 
 ---
 
 # 例题 子树颜色询问 2
 
 [洛谷U639895](https://www.luogu.com.cn/problem/U639895)
+
+给你一个有 $n$ 个点的有根树。点从 $1$ 到 $n$ 编号。点 $1$ 是根。
+每个点有一个颜色，点 $i$ 的颜色是 $a_i$。
+
+回答 $m$ 个询问。第 $i$ 和询问给你两个整数 $u_i, c_i$，问
+- 子树 $u_i$ 里有多少个颜色是 $c_i$ 的点？
+
+$1 \le n, m\le 2\times 10^5$
+$1 \le a_i \le n$
+
+---
+
+在 DFS 的过程中，我们维护一个数组 $(\mathrm{cnt}_i)_{1 \le i \le n}$，
+- $\mathrm{cnt}_i$：访问过的点中颜色是 $i$ 的有多少个。
+
+要知道子树 $u$ 里有多少个点颜色是 $c$，我们可以这样做
+- 在即将进入子树 $u$ 时，记下 $\mathrm{cnt}_c$ 的值。
+- 在即将离开子树 $u$ 时，记下 $\mathrm{cnt}_c$ 的值。
+- 后一个值减前一个值，结果就是子树 $u$ 里颜色是 $c$ 的点的数量。
+
+---
+
+<div class=columns>
+
+```cpp
+const int maxn = 2e5 + 5;
+vector<int> g[maxn];
+int a[maxn];
+vector<pair<int,int>> query[maxn];
+
+int cnt[maxn];
+int ans[maxn];
+
+void dfs(int u, int p) {
+    for (auto [c, i] : query[u])
+        ans[i] = cnt[c];
+    cnt[a[u]]++;
+    for (int v : g[u])
+        if (v != p)
+            dfs(v, u);
+    for (auto [c, i] : query[u])
+        ans[i] = cnt[c] - ans[i];
+}
+```
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n; cin >> n;
+    for (int i = 1; i <= n; i++)
+        cin >> a[i];
+    for (int i = 0; i < n - 1; i++) {
+        int u, v; cin >> u >> v;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+    int m; cin >> m;
+    for (int i = 0; i < m; i++) {
+        int u, c; cin >> u >> c;
+        query[u].push_back({c, i});
+    }
+    dfs(1, 0);
+    for (int i = 0; i < m; i++)
+        cout << ans[i] << '\n';
+}
+```
+
+</div>
+
+---
+
+上面的解法是是**离线**的
+- 先读入所有询问，再处理询问，最后输出每个询问的答案。
+
+现在来考虑**在线**的解法
+- 先做一些预处理，然后回答询问。
+每读入一个询问，输出答案，再读入下一个询问。
+
+---
+
+
+## 预处理
+
+求 DFS 序号。对每个点 $u$，定义
+- $L_u$：点 $u$ 的 DFS 序号
+- $R_u$：点 $u$ 里最后一个被 DFS 访问的点的 DFS 序号。
+
+把所有点按颜色分类。对每个颜色 $i$，定义
+- $V_i$：颜色是 $i$ 的点的 DFS 序号，从小到大排列，构成的列表。
+
+
+
+## 回答询问
+
+我们知道，点 $v$ 在子树 $u$ 里 $\iff$ $L_u \le L_v \le R_u$。
+所以，子树 $u$ 里颜色是 $c$ 的点的数量 = $V_c$ 里值在 $L_u$ 和 $R_u$ 之间的 DFS 序号的数量。
+后者可以通过在有序的列表 $V_c$ 上做两次**二分查找**来得到。
+
+---
+
+<div class=columns>
+
+```cpp
+const int maxn = 2e5 + 5;
+vector<int> g[maxn];
+int a[maxn];
+
+vector<int> V[maxn];
+int L[maxn], R[maxn], num;
+
+void dfs(int u, int p) {
+    L[u] = ++num;
+    V[a[u]].push_back(L[u]);
+    for (int v : g[u])
+        if (v != p)
+            dfs(v, u);
+    R[u] = num;
+}
+```
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int n; cin >> n;
+    for (int i = 1; i <= n; i++)
+        cin >> a[i];
+    for (int i = 0; i < n - 1; i++) {
+        int u, v; cin >> u >> v;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+    dfs(1, 0);
+    int m; cin >> m;
+    for (int i = 0; i < m; i++) {
+        int u, c; cin >> u >> c;
+        cout <<
+        upper_bound(V[c].begin(), V[c].end(), R[u])
+        - lower_bound(V[c].begin(), V[c].end(), L[u])
+         << '\n';
+    }
+}
+```
+
+</div>
+
 
 ---
 
@@ -334,7 +484,7 @@ int main() {
 - $p_i$：在已经访问过的深度等于 $i$ 的节点上，a 到 z 出现次数的奇偶性。0 偶，1 奇。
 
 为了回答询问 $(v, h)$，在即将进入子树 $v$ 时，记录一下 $p_h$ 的值，在即将离开子树 $v$ 时，再记录一下 $p_h$ 的值。把这先后两个 01 序列异或，结果就是
-- 子树 $v$ 里深度等于 $v$ 的那些点上，每种字符出现次数的奇偶性。
+- 子树 $v$ 里深度等于 $h$ 的那些点上，每种字符出现次数的奇偶性。
 
 若结果中 1 不超过 $1$ 个，那些字符就能构成回文串。
 
@@ -382,59 +532,140 @@ int main() {
 
 ---
 
-上面的解法是离线的，时间 $O(n)$。
 
-还有一种类似的在线解法。
+上面的解法是离线的。现在来考虑在线解法。
 
-对每个 $d = 1, \dots, n$，定义一个有序的列表
-- $\mathrm{order}_d$：深度为 $d$ 的点的 DFS 序号，从小到大排列构成的列表。
 
-对每个 $i = 1, \dots, n$，设点 $v$ 的 DFS 序号是 $i$，定义
-- $s_i$：和点 $v$ 在同一深度且 DFS 序号小于等于 $i$ 的那些点上，每种字符出现次数的奇偶性。
+## 预处理
 
-对于询问 $(v, h)$，设子树 $v$ 里的点的 DFS 序号范围是 $[L_v, R_v]$，在列表 $\mathrm{order}_h$ 上二分查找，找出子树 $v$ 里第一个和最后一个深度是 $h$ 的点的 DFS 序号。  
+求 DFS 序号。对每个点 $u$，定义
+- $L_u$：点 $u$ 的 DFS 序号。
+- $R_u$：点 $u$ 里最后一个被 DFS 访问的点的 DFS 序号。
+
+把所有点按深度分组。对每个深度 $d$，定义
+- $V_d$：深度为 $d$ 的点的 DFS 序号，从小到大排列，构成的列表。
+
+---
+
+
+对每一组点，求**前缀和**。这里介绍两种实现方法。
+
+方法一：对每个深度 $d$，定义序列 $(s_{d,i})_{0 \le i \le |V_d|}$（$|V_d|$ 表示 $V_d$ 的长度）
+- $s_{d,i}$：一个长为 $26$ 的 01 序列，表示 $V_d$ 里前 $i$ 个点上，每种字符出现次数的奇偶性。
+
+
+方法二：定义序列 $(s_i)_{1 \le i \le n}$
+- 设 DFS 序号等于 $i$ 的点是 $v$，点 $v$ 的深度是 $d$。
+- $s_i$：一个长为 $26$ 的 01 序列，表示深度等于 $d$ 且 DFS 序号不超过 $i$ 的那些点上，每种字符出现次数的奇偶性。
+
+---
+
+
+## 回答询问
+
+对于询问 $(v, h)$，子树 $v$ 里的点的 DFS 序号范围是 $[L_v, R_v]$，据此在 $V_h$ 上**二分查找**。
+
+如果采用上述方法一来表示前缀和，设 $V_h$ 中落在 $[L_v, R_v]$ 内的 DFS 序号的下标范围是 $[l, r]$，那么
+- 子树 $v$ 里深度是 $h$ 的那些点上，每种字符出现次数的奇偶性就是 $s_{h,r} \oplus s_{h,l-1}$。
+
+如果采用上述方法二来表示前缀和，设 $V_h$ 中最后一个小于 $L_v$ 的 DFS 序号是 $l$，最后一个不大于 $R_v$ 的 DFS 序号是 $r$，那么
+- 子树 $v$ 里深度是 $h$ 的那些点上，每种字符出现次数的奇偶性就是 $s_{r} \oplus s_{l}$。
 
 ![center h:150](同一深度的点.svg)
 
 ---
 
+下列代码是采用上述方法二来表示前缀和。
+
+<div class=columns>
+
 ```cpp
 bitset<26> s[maxn];
-vector<int> order[maxn];
+vector<int> V[maxn];
 int L[maxn], R[maxn], num;
 
 void dfs(int u, int depth) {
     L[u] = ++num;
-    int prev = order[depth].empty() ? 0 : order[depth].back();
-    s[num] = s[prev];
+    s[num] = s[V[depth.back()]];
     s[num].flip(c[u] - 'a');
-    order[depth].push_back(num);
+    V[depth].push_back(num);
     for (int v : g[u])
         dfs(v, depth + 1);
     R[u] = num;
 }
+```
 
+```cpp
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     // 输入 ...
+    for (int i = 1; i <= n; i++)
+        V[i].push_back(0);
     dfs(1, 1);
     for (int i = 0; i < m; i++) {
         int v, h; cin >> v >> h;
         bitset<26> ans;
-        auto l = lower_bound(order[h].begin(), order[h].end(), L[v]);
-        auto r = upper_bound(order[h].begin(), order[h].end(), R[v]);
-        for (auto ptr : {l, r})
-            if (ptr != order[h].begin())
-                ans ^= s[*(ptr - 1)];
+        auto l = lower_bound(V[h].begin(), V[h].end(), L[v]);
+        auto r = upper_bound(V[h].begin(), V[h].end(), R[v]);
+        bitset<26> ans = s[*(r - 1)] ^ s[*(l - 1)];
         cout << (ans.count() > 1 ? "No" : "Yes") << '\n';
     }
 }
 ```
 
+</div>
+
+
 ---
 
-离线解法更好写。
+上面代码里的 `bitset<26>` 也可换为 `int`。
+
+<div class=columns>
+
+```cpp
+int s[maxn];
+vector<int> V[maxn];
+int L[maxn], R[maxn], num;
+
+void dfs(int u, int depth) {
+    L[u] = ++num;
+    s[num] = s[V[depth.back()]] ^ 1 << (c[u] - 'a');
+    V[depth].push_back(num);
+    for (int v : g[u])
+        dfs(v, depth + 1);
+    R[u] = num;
+}
+```
+
+```cpp
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    // 输入 ...
+    for (int i = 1; i <= n; i++)
+        V[i].push_back(0);
+    dfs(1, 1);
+    for (int i = 0; i < m; i++) {
+        int v, h; cin >> v >> h;
+        auto l = lower_bound(V[h].begin(), V[h].end(), L[v]);
+        auto r = upper_bound(V[h].begin(), V[h].end(), R[v]);
+        int ans = s[*(r - 1)] ^ s[*(l - 1)];
+        cout << (ans & (ans - 1) ? "No" : "Yes") << '\n';
+    }
+}
+```
+
+</div>
+
+
+---
+
+
+离线解法的优点
+
+- 通常，离线解法更好写。
+- 有些问题并没有简单的在线解法。
 
 ---
 
@@ -455,16 +686,15 @@ int main() {
 注意：设某人的终点是 $j$，如果他在第 $w_j$ 秒之前到达点 $j$，那么他**不**会被观察到。
 
 - $991 \le n, m \le 299998$
-
+- $0 \le w_j \le n$
 
 ---
 
 ![bg right:35% fit](上行下行.svg)
 
-考虑以点 $1$ 为根的有根树。
-把点 $u$（$1 \le u \le n$）的深度记作 $\depth[u]$。
+考虑以点 $1$ 为根的**有根树**。
 
-设某人从 $s$ 出发跑向 $t$。我们把这条路径上的点分成两段
+设某人从 $s$ 出发跑向 $t$。我们路径 $s \leadsto t$ 上的点分成两段
 - 上行：从 $s$ 到 $\lca(s, t)$
 - 下行：从 $\lca(s, t)$ 到 $t$，不包括 $\lca(s, t)$。
 
@@ -479,17 +709,17 @@ int main() {
 </div>
 
 某人从 $s$ 跑向 $t$，上行经过点 $j$，且被观察员 $j$ 观察到，当且仅当
-$$\depth(j) - \depth(s) = w_j$$
+$$\depth(s) - \depth(j) = w_j$$
 即
 $$
-\depth(s) = \depth(j) - w_j.
+\depth(s) = w_j + \depth(j).
 $$
 
 我们可以这样看
 - 每个点 $j$ 有一个（多重）集合 $A_j$，最初为空。
 - 对于每一条路径 $s \leadsto t$ 的上行段的每个点 $j$，向 $A_j$ 里添加一个数 $\depth(s)$。
 
-观察员 $j$ 观察到的上行人数 = 集合 $A_j$ 里 $(\depth(j) - w_j)$ 的个数.
+观察员 $j$ 观察到的上行人数 = 集合 $A_j$ 里 $(w_j + \depth(j))$ 的个数.
 
 ---
 
@@ -506,20 +736,25 @@ $$
 $$
 即
 $$
-2 \depth(\lca(s, t)) - \depth(s) = \depth(j) - w_j.
+\depth(s) - 2 \depth(\lca(s, t)) = w_j - \depth(j).
 $$
 
 我们可以这样看
 - 每个点 $j$ 有一个（多重）集合 $B_j$，最初为空。
-- 对于每一条路径 $s \leadsto t$ 的下行段的每个点 $j$，向 $B_j$ 里添加一个数 $2 \depth(\lca(s, t)) - \depth(s)$。
+- 对于每一条路径 $s \leadsto t$ 的下行段的每个点 $j$，向 $B_j$ 里添加一个数 $\depth(s) - 2 \depth(\lca(s, t))$。
 
-观察员 $j$ 观察到的下行人数 = 集合 $B_j$ 里 $(\depth(j) - w_j)$ 的个数.
+观察员 $j$ 观察到的下行人数 = 集合 $B_j$ 里 $(w_j - \depth(j))$ 的个数.
 
 ---
 
-- 用树上差分来处理这里的「向一条路径上的每个点的集合里添加同一个数」的操作。
+设 $u, v$ 是树上两点，$u$ 是 $v$ 的祖先。
+向路径 $x \leadsto y$ 上每个点 $j$ 的集合 $A_j$ 里添加一个数 $x$，在差分序列上的效果就是
+- 在点 $u$ 处加一个「添加一个 $x$ 」的操作，
+- 在 $v$ 的父节点处加一个「删除一个 $x$」的操作。
 
-- 这里的路径是特殊的：两个端点是“祖先—后代”关系。
+然后，对每个点 $j$
+- 求集合 $A_j$ 就化为对子树 $j$ 求和，
+- 我们想要知道 $A_j$ 里有多少个 $\depth(j) + w_j$。
 
 ---
 
@@ -535,10 +770,9 @@ int anc[maxn][19];
 int lca(int u, int v) {
     if (is_ancestor(u, v)) return u;
     if (is_ancestor(v, u)) return v;
-    for (int i = 18; i >= 0; i--) {
+    for (int i = 18; i >= 0; i--)
         if (anc[u][i] && !is_ancestor(anc[u][i], v))
             u = anc[u][i];
-    }
     return anc[u][0];
 }
 
@@ -551,9 +785,8 @@ void dfs(int u, int p) {
     for (int i = 1; i < 19; i++)
         anc[u][i] = anc[anc[u][i - 1]][i - 1];
     for (int v : g[u])
-        if (v != p) {
+        if (v != p)
             dfs(v, u);
-        }
     R[u] = num;
 }
 ```
@@ -561,27 +794,26 @@ void dfs(int u, int p) {
 ---
 
 ```cpp
+int w[maxn];
 int cnt[2 * maxn];
 int ans[maxn];
-vector<pair<int,int>> op[maxn];
+vector<pair<int,int>> op_up[maxn], op_down[maxn];
 void get_up(int u, int p) {
     int key = w[u] + depth[u];
     int before = cnt[key];
-    for (auto [k, type] : op[u])
-        cnt[k] += type;
+    for (auto [x, delta] : op_up[u])
+        cnt[x] += delta;
     for (int v : g[u])
         if (v != p)
             get_up(v, u);
     ans[u] += cnt[key] - before;
 }
 
-int n, m;
 void get_down(int u, int p) {
-    int key = w[u] - depth[u] + n;
+    int key = w[u] - depth[u] + maxn;
     int before = cnt[key];
-    for (auto [k, type] : op[u]) {
-        cnt[k] += type;
-    }
+    for (auto [x, delta] : op_down[u])
+        cnt[x + maxn] += delta;
     for (int v : g[u])
         if (v != p)
             get_down(v, u);
@@ -595,7 +827,7 @@ void get_down(int u, int p) {
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
-    cin >> n >> m;
+    int n, m; cin >> n >> m;
     for (int i = 1; i < n; i++) {
         int u, v; cin >> u >> v;
         g[u].push_back(v);
@@ -603,33 +835,22 @@ int main() {
     }
     for (int i = 1; i <= n; i++)
         cin >> w[i];
-    
+
     dfs(1, 0);
 
-    vector<int> s(m), t(m), LCA(m);
     for (int i = 0; i < m; i++) {
-        cin >> s[i] >> t[i];
-        LCA[i] = lca(s[i], t[i]);
-        ans[LCA[i]] += depth[s[i]] == depth[LCA[i]] + w[LCA[i]];
+        int s, t; cin >> s >> t;
+        int u = lca(s, t);
+        op_up[s].push_back({depth[s], 1});
+        op_up[anc[u][0]].push_back({depth[s], -1});
+        op_down[t].push_back({depth[s] - 2 * depth[u], 1});
+        op_down[u].push_back({depth[s] - 2 * depth[u], -1});
     }
-    for (int i = 0; i < m; i++) {
-        int k = depth[s[i]];
-        op[s[i]].push_back({k, 1});
-        op[LCA[i]].push_back({k, -1});
-    }
-    get_up(1, 0);
 
+    get_up(1, 0);
     memset(cnt, 0, sizeof cnt);
-    for (int i = 1; i <= n; i++)
-        op[i].clear();
-    
-    for (int i = 0; i < m; i++) {
-        int time = depth[s[i]] + depth[t[i]] - 2 * depth[LCA[i]];
-        int k = time - depth[t[i]] + n;
-        op[t[i]].push_back({k, 1});
-        op[LCA[i]].push_back({k, -1}); 
-    }
     get_down(1, 0);
+
     for (int i = 1; i <= n; i++)
         cout << ans[i] << ' ';
     cout << '\n';
@@ -637,7 +858,6 @@ int main() {
 ```
 
 ---
-
 
 # 方法三：DSU on Tree
 

@@ -87,11 +87,11 @@ lineNumbers: true
 
 ---
 
-![center](./hierholzer-example-1.svg)
+![center](./hierholzer-example-1.svg){width="700"}
 
 ---
 
-![center](./hierholzer-example-2.svg)
+![center](./hierholzer-example-2.svg){width="800"}
 
 ---
 
@@ -136,8 +136,9 @@ Yes
 
 
 ---
-
-# 递归写法
+layout: two-cols
+layoutClass: gap-4
+---
 
 ```cpp
 struct Edge {
@@ -156,8 +157,7 @@ int ptr[maxn];
 int write_ptr;
 ```
 
----
-
+::right::
 
 
 ```cpp

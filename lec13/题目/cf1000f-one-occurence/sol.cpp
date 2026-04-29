@@ -1,3 +1,10 @@
+/*
+分块。
+f[i][j]：argmax_k next[k] s.t. j * B <= k < (j + 1) * B  && prev[k] < i
+for i <= j * B
+
+TLE 了
+*/
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -15,41 +22,54 @@ int main() {
     vector<int> a(n);
     for (int i = 0; i < n; i++)
         cin >> a[i];
-    vector<int> prev(n, -1), next(n, n);
+
     vector<int> last((int) 5e5 + 5, -1);
+    vector<int> prev(n, -1); 
     for (int i = 0; i < n; i++) {
         prev[i] = last[a[i]];
-        if (prev[i] != -1)
-            next[prev[i]] = i;
         last[a[i]] = i;
     }
+    vector<int> next(n + 1, n);
+    next[n] = -1;
+    for (int i = 0; i < n; i++)
+        if (prev[i] != -1)
+            next[prev[i]] = i;
 
     int B = (int) sqrt(n);
     int NB = n / B;
-    vector<int> f(NB, n);
-    for (int i = 0; i < NB; i++) {
-        int l = i * B, r = l + B;
-        int t = l;
-        for (int j = l + 1; j < r; j++)
-            if (prev[j] < l && next[j] > next[t])
-                t = j;
-        f[i] = t;
+    
+    vector<vector<int>> f;
+    for (int j = 0; j < NB; j++) {
+        vector<int> t(j * B + 1, n);
+        for (int i = j * B; i < (j + 1) * B; i++) {
+            if (prev[i] < j * B && next[t[prev[i] + 1]] < next[i]) {
+                t[prev[i] + 1] = i;
+            }
+        }
+        for (int i = 0; i < j * B; i++) // 可以看作求“前缀和”
+            if (next[t[i + 1]] < next[t[i]])
+                t[i + 1] = t[i];
+        f.push_back(t);
     }
 
-    debug(prev);
-    debug(next);
     auto query = [&](int l, int r) {
         int lb = (l + B - 1) / B;
         int rb = r / B;
-        for (int i = l; i < lb * B; i++)
-            if (prev[i] < l && next[i] >= r)
-                return a[i];
-        for (int i = lb; i < rb; i++)
-            if (prev[f[i]] < l && next[f[i]] >= r)
-                return a[f[i]];
-        for (int i = lb * B; i < r; i++)
-            if (prev[i] < l && next[i] >= r)
-                return a[i];
+        if (lb > rb) {
+            for (int i = l; i < r; i++)
+                if (prev[i] < l && next[i] >= r)
+                    return a[i];
+        } else {
+            for (int i = l; i < lb * B; i++)
+                if (prev[i] < l && next[i] >= r)
+                    return a[i];
+            for (int i = rb * B; i < r; i++)
+                if (prev[i] < l && next[i] >= r)
+                    return a[i];
+            for (int i = lb; i < rb; i++)
+                if (next[f[i][l]] >= r)
+                    return a[f[i][l]];
+        }
         return 0;
     };
 

@@ -1,4 +1,15 @@
+# Ignore everything
+*
+
+# Allow directories
+!*/
+
+# Allow any file with a dot (covers extensions and dot-files)
+!*.*
+
 dist/
+tests/
+*.zip
 .wrangler/
 node_modules/
 .cph/

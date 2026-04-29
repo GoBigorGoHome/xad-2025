@@ -37,25 +37,23 @@ void dfs(int u, int p) {
 int w[maxn];
 int cnt[2 * maxn];
 int ans[maxn];
-vector<pair<int,int>> op[maxn];
+vector<pair<int,int>> op_up[maxn], op_down[maxn];
 void get_up(int u, int p) {
     int key = w[u] + depth[u];
     int before = cnt[key];
-    for (auto [k, type] : op[u])
-        cnt[k] += type;
+    for (auto [x, delta] : op_up[u])
+        cnt[x] += delta;
     for (int v : g[u])
         if (v != p)
             get_up(v, u);
     ans[u] += cnt[key] - before;
 }
 
-int n, m;
 void get_down(int u, int p) {
-    int key = w[u] - depth[u] + n;
+    int key = w[u] - depth[u] + maxn;
     int before = cnt[key];
-    for (auto [k, type] : op[u]) {
-        cnt[k] += type;
-    }
+    for (auto [x, delta] : op_down[u])
+        cnt[x + maxn] += delta;
     for (int v : g[u])
         if (v != p)
             get_down(v, u);
@@ -65,6 +63,7 @@ void get_down(int u, int p) {
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
+    int n, m;
     cin >> n >> m;
     for (int i = 1; i < n; i++) {
         int u, v;
@@ -74,33 +73,22 @@ int main() {
     }
     for (int i = 1; i <= n; i++)
         cin >> w[i];
-    
+
     dfs(1, 0);
 
-    vector<int> s(m), t(m), LCA(m);
     for (int i = 0; i < m; i++) {
-        cin >> s[i] >> t[i];
-        LCA[i] = lca(s[i], t[i]);
-        ans[LCA[i]] += depth[s[i]] == depth[LCA[i]] + w[LCA[i]];
+        int s, t; cin >> s >> t;
+        int u = lca(s, t);
+        op_up[s].push_back({depth[s], 1});
+        op_up[anc[u][0]].push_back({depth[s], -1});
+        op_down[t].push_back({depth[s] - 2 * depth[u], 1});
+        op_down[u].push_back({depth[s] - 2 * depth[u], -1});
     }
-    for (int i = 0; i < m; i++) {
-        int k = depth[s[i]];
-        op[s[i]].push_back({k, 1});
-        op[LCA[i]].push_back({k, -1});
-    }
-    get_up(1, 0);
 
+    get_up(1, 0);
     memset(cnt, 0, sizeof cnt);
-    for (int i = 1; i <= n; i++)
-        op[i].clear();
-    
-    for (int i = 0; i < m; i++) {
-        int time = depth[s[i]] + depth[t[i]] - 2 * depth[LCA[i]];
-        int k = time - depth[t[i]] + n;
-        op[t[i]].push_back({k, 1});
-        op[LCA[i]].push_back({k, -1}); 
-    }
     get_down(1, 0);
+
     for (int i = 1; i <= n; i++)
         cout << ans[i] << ' ';
     cout << '\n';
