@@ -1,12 +1,3 @@
-# Ignore everything
-*
-
-# Allow directories
-!*/
-
-# Allow any file with a dot (covers extensions and dot-files)
-!*.*
-
 dist/
 tests/
 *.zip
@@ -14,4 +5,5 @@ tests/
 node_modules/
 .cph/
 *.autosave.ipe
-*/题目/*/sol
+**/题目/*/*
+!**/题目/*/*.*
