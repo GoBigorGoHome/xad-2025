@@ -930,7 +930,7 @@ int main() {
 
 ---
 
-![bg right fit](animate_dsu_on_tree.svg)
+![bg right:40% fit](animate_dsu_on_tree.svg)
 
 我们把 $\mathrm{cnt}$ 数组和 $k$ 设置为全局变量，把二者统称为**全局数据结构**或**全局状态**。
 
