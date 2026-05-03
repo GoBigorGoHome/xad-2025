@@ -3,6 +3,7 @@ marp: true
 math: mathjax
 paginate: true
 theme: lecture
+title: 树的结构
 ---
 
 # 树的结构
