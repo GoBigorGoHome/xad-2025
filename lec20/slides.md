@@ -360,3 +360,16 @@ $$
 
 ---
 
+## 分解
+
+![](centroid_decomposition.png)
+
+![bg right:30% h:200](centroid_tree.png)
+
+---
+
+## 性质
+
+1. 重心树的高度不超过 $\log n$。 
+2. 点 $u$ 在它（重心树上）的祖先的连通块里。
+3. 每一条从 $u$ 到 $v$ 的路径可以分解成两段，$u \leadsto w$ 和 $w\leads to v$，其中 $w$ 是 $u$ 和 $v$ 在重心树上的最近公共祖先。
