@@ -3,7 +3,7 @@ marp: true
 math: mathjax
 paginate: true
 theme: lecture
-title: 树的结构
+title: 树论（二）：树的结构
 ---
 
 # 树的结构
@@ -73,6 +73,15 @@ title: 树的结构
 - 如果我们寻找距离某个点 $x$ 最远的点……
 
 ![bg right:40% h:250](找离x最远的点.png)
+
+---
+
+## 直径的性质
+
+- 对于任意顶点 $x$，直径的某个端点一定是距离 $x$ 最远的点。
+
+![bg right:40% h:260](离x最远的点.png)
+
 
 ---
 
