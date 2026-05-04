@@ -6,6 +6,13 @@ theme: lecture
 title: 树论（二）：树的结构
 ---
 
+<div class=hidden>
+
+$\DeclareMathOperator{\sz}{sz}$
+
+</div>
+
+
 # 树的结构
 
 ---
@@ -336,6 +343,210 @@ int centroid(int u, int p) {
 ```
 
 ---
+
+# 例题 树的重心
+
+洛谷[P5666](https://www.luogu.com.cn/problem/P5666)
+
+给你一个有 $n$ 个点树。点从 $1$ 到 $n$ 编号。
+删除一条边后，分裂成两个子树。这样的树有 $2(n-1)$ 个。
+求这些树的重心的编号之和。若一个树有两个重心，两个都算。
+
+一个测试点有 $T$ 组数据。
+
+- $1 \le T \le 5$
+- $7 \le n \le 299995$
+
+
+---
+
+
+
+
+<!-- 对于有根树，我们把点 u 的 size 子树 u 的 size 视作同义词。 -->
+
+<div class=proposition>
+
+设 $u$ 是一个有根树的任意一点。那么 $u$ 是树的重心当且仅当点 $u$ 的 size 不小于整个树大小的一半，且点 $u$ 的每个孩子的 size 都不超过整个树 size 的一半。
+
+</div>
+
+---
+
+## 记号、术语
+
+对于有根树里的一个点 $u$，
+- 把点 $u$ 的 size 记作 $\sz(u)$，
+- 把点 $u$ 的 size 最大的孩子的 size 记作 $h(u)$。
+- 设 $v$ 是 $u$ 的孩子，把子树 $v$ 叫作「$u$ 的子树 $v$」。
+
+---
+
+考虑以点 $1$ 为根的有根树。设删除的边是点 $k$ 的父边（$k\ne 1$），那么删除这条边后，分裂成的两块，一块是子树 $k$，另一块不妨称之为「剩余部分」。
+
+对于每个点 $u$，我们计算有多少个点 $k$ 使得 $u$ 是某一部分的重心。
+为此，我们分别两种情形
+- $u$ 子树 $k$ 的重心。此时 $k$ 是 $u$ 的祖先。
+- $u$ 是剩余部分的祖先。此时 $k$ 不是 $u$ 的祖先。
+
+<!-- u 是求和指标，k 是计数对象。 -->
+
+---
+
+![bg right:30% h:500](case1.svg)
+
+情况一：$k$ 是 $u$ 的祖先，$u$ 是子树 $k$ 的重心。
+
+需要有 $\sz(u) \ge \sz(k) / 2$ 且 $h(u) \le \sz(k)/2$，即点 $k$ 需要满足
+$$
+2 \cdot h(u) \le \sz(k) \le 2 \sz(u).
+$$
+
+---
+
+![center h:300](case2.svg)
+
+情况二：$k$ 不是 $u$ 的祖先，$u$ 是剩余部分的重心。此时还要细分
+
+- $k$ 不是 $u$ 的后代。此时需要有 $2 \cdot h(u) \le n - \sz(k) \le 2 \sz(u)$，即点 $k$ 需要满足
+    $$
+    n - 2 \sz(u) \le \sz(k) \le n - 2 \cdot h(u).
+    $$
+- $k$ 是 $u$ 的严格后代。如果仍然把剩余部分视作以点 $1$ 为根的有根树，那么 $\sz(u)$ 和 $h(u)$ 就不再是跟 $k$ 无关的了。此时，设 $k$ 在 $u$ 的子树 $v$ 里，我们不妨把剩余部分视作以 $v$ 为根的有根树，这样 $h(u)$ 和 $\sz(u)$ 就跟 $k$ 无关了（但是跟 $v$ 有关）。
+
+---
+
+对于 $k$ 不是 $u$ 的严格后代的情况，为了能快速算出以 $v$ 为根时的 $h(u)$，我们需要
+- 以点 $1$ 为根时的 $h(u)$。
+- 以点 $1$ 为根时点 $u$ 的第二大的子树的 size。
+
+```cpp
+vector<int> g[maxn];
+int sz[maxn], h[maxn], h2[maxn];
+void get_size(int u, int p) {
+    sz[u] = 1; h[u] = 0, h2[u] = 0;
+    for (int v : g[u]) {
+        if (v != p) {
+            get_size(v, u);
+            sz[u] += sz[v];
+            if (sz[v] > h[u]) {
+                h2[u] = h[u]; h[u] = sz[v];
+            } else if (sz[v] > h2[u])
+                h2[u] = sz[v];
+        }
+    }
+}
+```
+
+---
+
+对于我们要数的东西（计数对象），点 $v$，要们想要知道满足 $\sz(v)$ 在某个范围内的点 $v$ 有多少个。为此，我们使用一个**树状数组**。
+
+```cpp
+int a[maxn];
+int n;
+void add(int p, int v) {
+    while (p <= n) {
+        a[p] += v;
+        p += p & -p;
+    }
+}
+int sum(int p) {
+    if (p < 0) return 0;
+    if (p > n) p = n;
+    int ans = 0;
+    while (p > 0) {
+        ans += a[p];
+        p -= p & -p;
+    }
+    return ans;
+}
+int sum(int l, int r) {
+    return sum(r) - sum(l - 1);
+}
+```
+
+---
+
+对于每个点 $u$，我们需要它的祖先中有多少点 $v$ 满足 $\sz(v)$ 在某个范围内。为此，在 DFS 的过程中，我们维护当前点的祖先（根除外）的 size 的列表。
+
+这个列表是有序的，我们可以在上面**二分查找**。
+
+```cpp
+vector<int> anc;
+
+int cnt_anc(int L, int R) {//anc是一个递减的序列
+    return upper_bound(anc.rbegin(), anc.rend(), R)
+        - lower_bound(anc.rbegin(), anc.rend(), L);
+}
+```
+
+---
+
+```cpp
+int cnt[maxn]; // cnt[u]：点u做重心的次数。
+void dfs(int u, int p) {
+    if (p) {
+        anc.push_back(sz[u]);
+        add(sz[u], 1);
+    }
+    // case 1
+    cnt[u] += cnt_anc(2 * h[u], 2 * sz[u]);
+    // case 2
+    int L = n - 2 * sz[u]; int R = n - 2 * h[u];
+    // 去掉u的祖先的中满足条件的v
+    cnt[u] -= cnt_anc(L, R);
+    for (int v : g[u]) {
+        if (v == p) continue;
+        int new_h = (sz[v] == h[u] ? max(h2[u], n - sz[u]) 
+                                : max(h[u], n - sz[u]));
+        int new_sz = n - sz[v];
+        int new_L = n - 2 * new_sz; int new_R = n - 2 * new_h;
+        cnt[u] -= sum(new_L, new_R);
+        cnt[u] += sum(L, R);
+        dfs(v, u);
+        cnt[u] -= sum(L, R);
+        cnt[u] += sum(new_L, new_R);
+    }
+    if (p) anc.pop_back();
+}
+```
+
+---
+
+```cpp
+int main() {
+    int T; cin >> T;
+    while (T--) {
+        cin >> n;
+        for (int i = 1; i <= n; i++) {
+            g[i].clear();
+            cnt[i] = 0;
+            a[i] = 0;
+        }
+        for (int i = 0; i < n - 1; i++) {
+            int u, v; cin >> u >> v;
+            g[u].push_back(v);
+            g[v].push_back(u);
+        }
+
+        get_size(1, 0);
+        dfs(1, 0);
+
+        long long ans = 0;
+        for (int u = 1; u <= n; u++) {
+            int L = n - 2 * sz[u];
+            int R = n - 2 * h[u];
+            cnt[u] += sum(L, R);
+            ans += (long long) u * cnt[u];
+        }
+        cout << ans << '\n';
+    }
+}
+```
+
+---
+
 
 ## 重心的性质
 
