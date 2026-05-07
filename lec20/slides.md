@@ -173,7 +173,7 @@ $\DeclareMathOperator{\sz}{sz}$
 
 ${1\over 2}\left((\sum_i c_i)^2 - \sum_i c_i^2\right)$
 
-$c_i$：第一个子树里，深度是 $h$ 的点的个数。
+$c_i$：第 $i$ 个子树里，深度是 $h$ 的点的个数。
 
 ---
 
@@ -249,7 +249,7 @@ $c_i$：第一个子树里，深度是 $h$ 的点的个数。
 - 使各连通块的 size 的最大值
 （$\max\set{2,2,4} = 4$）最小的顶点 $v$ 就是树的重心。
 
-重心只有一个 $\implies$ 若把 $v$ 向最大的连通块（size 4）的方法移动一步，将造成一个更大的连通块（size 5）
+重心只有一个 $\implies$ 若把 $v$ 向最大的连通块（size 4）的方向移动一步，将造成一个更大的连通块（size 5）
 
 $\implies$ 最大连通块（size 4）的大小不到整个树（size 9）的一半。
 
@@ -537,7 +537,7 @@ int main() {
         for (int u = 1; u <= n; u++) {
             int L = n - 2 * sz[u];
             int R = n - 2 * h[u];
-            cnt[u] += sum(L, R);
+            cnt[u] += sum(L, R);   
             ans += (long long) u * cnt[u];
         }
         cout << ans << '\n';
