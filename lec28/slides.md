@@ -17,6 +17,7 @@ $\DeclareMathOperator{\extgcd}{extgcd}$
 $\newcommand{\Div}{\mathrel{\Vert}}$
 $\DeclarePairedDelimiter\ceil{\lceil}{\rceil}$
 $\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}$
+$\renewcommand{\%}{\mathbin{\text{\%}}}$
 
 </div>
 
@@ -237,7 +238,7 @@ r_0 \ge r_1 > r_2 > \dots > r_{n} > r_{n+1} = 0.
 $$
 根据上一页的命题，我们有
 $$
-r_{i} > 2 r_{i+1} \qquad \text{for}\ 1 \le i \le n.
+r_{i-1} > 2 r_{i+1} \qquad \text{for}\ 1 \le i \le n.
 $$
 分别看 $r_0, r_2, \dots$ 和 $r_1, r_3, \dots$，有
 $$
@@ -344,9 +345,9 @@ $$
 $$ b' | (x - x_0) $$
 也就是说，存在整数 $t$ 使得 $x - x_0 = b't$，即 $x = x_0 + b't$。
 
-若 $b' = 0$，即 $b = 0$，此时必有 $a \ne 0$，则 $x$ 的值唯一，是 $x = x_0 = c/a$，而 $y$ 可取任一整数。此时 $a' = 1$，所以 $y =y_0 - a't = y_0 - t$ 确实可以取到每个整数。
+若 $b' = 0$，即 $b = 0$，此时必有 $a \ne 0$，则 $x$ 的值唯一，是 $x = x_0 = c/a$，而 $y$ 可取任一整数。此时 $a' = \pm 1$，而 $y =y_0 - a't$ 确实可以取到每个整数。
 
-若 $b' \ne 0$，将 $x - x_0 = b't$ 代入 $\eqref{eq1}$ 并除以 $b'$，得 $y - y_0 = -a't$，即 $y = y_0 - a't$。
+若 $b' \ne 0$，将 $x - x_0 = b't$ 代入 $\eqref{eq1}$，得 $a'b't = -b'(y - y_0)$，除以 $-b'$，得 $-a't = y - y_0$，即 $y = y_0 - a't$。
 
 ---
 
@@ -548,10 +549,13 @@ $$
 
 ---
 
-# C++ 里的 % 运算符和 / 运算符。
+# C++ 里的 % 运算符和 / 运算符
 
 设 $a, b$ 是整数，$b \ne 0$。
-- 如果 $b$ 整除 $a$，那么 $a \% b = 0$。如果 $b$ 不整除 $a$，此时必有 $a \ne 0$，那么 $a\%b \ne 0$，$|a\%b|$ 的符号与 $a$ 相同，$|a\%b| < |b|$。
+- 如果 $b$ 整除 $a$，那么 $a \% b = 0$。如果 $b$ 不整除 $a$，此时必有 $a \ne 0$，那么
+    - $a\%b \ne 0$，
+    - $a\%b$ 的符号与 $a$ 相同，
+    - $|a\%b| < |b|$。
 - `a == (a / b) * b + (a % b)` 总是成立。
 
 ---
@@ -560,26 +564,39 @@ $$
 
 <div class=proposition>
 
-设 $a, b$ 是整数，$a \ne 0$ 且 $b \ne 0$。设 $g = \gcd(a, b)$，那么 `extgcd(a, b, x, y)` 给出的 $x, y$ 满足
+设 $a, b$ 是整数，$a \ne 0$ 且 $b \ne 0$，设 $g = \gcd(a, b)$。那么 `extgcd(a, b, x, y)` 给出的 $x, y$ 满足
 $$ |x| \le {|b| \over g}, \quad |y| \le {|a| \over g}. $$
 
 </div>
 
 ---
 
-**证明**：用归纳法。
+**证明**：用归纳法。回忆到条件是 $a\ne 0$ 且 $b\ne 0$。
+当 $a\%b = 0$ 时，$g = |b|$，`extgcd(a, b, x, y)` 给出 $(x, y) = (0, 1)$。此时 $|a| \ge |b|$，$0 \le {|b| \over g} = 1$ 且 $1 \le {|a| \over g}$，命题成立。
 
-当 $a\%b = 0$ 时，$g = |b|$，`extgcd(a, b, x, y)` 给出 $(x, y) = (0, 1)$，命题成立。
-当 $a \%b \ne 0$ 时，设 $q =$ `a / b`。根据归纳假设，递归调用 `extgcd(b, a % b, y, x)` 给出的 $(x', y')$ 满足 $|x'| \le {|a\%b|\over g}$，$|y'| \le {|b| \over g}$。根据 $x = y'$ 和 $y = x' - qy'$，有
+当 $a \%b \ne 0$ 时，根据归纳假设，递归调用 `extgcd(b, a % b, y, x)` 给出的 $(x', y')$ 满足 $|x'| \le {|a\%b|\over g}$，$|y'| \le {|b| \over g}$。设 $q =$ `a / b`，根据 $x = y'$ 和 $y = x' - qy'$，有
 $$ |x| = |y'|\le {|b| \over g} $$
 和
 $$
 |y| = |x'-qy'| \le |x'| + |qy'| \le {|a\%b| \over g} + {|qb| \over g}.  
 $$
-注意到 $a\%b$ 与 $qb$ 符号相同，所以 $|a\%b| + |qb| = |a\%b + qb| = |a|$。于是有
+回忆到 $a\%b$ 与 $qb$ 符号相同，所以 $|a\%b| + |qb| = |a\%b + qb| = |a|$。于是有
 $$
 |y| \le {|a| \over g}.
 $$
+
+---
+
+用同样的方法，我们还可以证明
+
+<div class=proposition>
+
+设 $a, b$ 是整数，$a \ne 0$，$b \ne 0$ 且 $|a| \ne |b|$，设 $g = \gcd(a, b)$。
+那么 `extgcd(a, b, x, y)` 给出的 $x, y$ 满足
+$$ |x| \le {|b| \over 2g}, \quad |y| \le {|a| \over 2g}. $$
+
+</div>
+
 
 ---
 
