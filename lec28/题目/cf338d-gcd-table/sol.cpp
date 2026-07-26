@@ -12,6 +12,10 @@ using namespace std;
 #define debug(...) 42
 #endif
 
+long long gcd(long long a, long long b) {
+    return b == 0 ? abs(a) : gcd(b, a % b);
+}
+
 template<typename T>
 pair<T, T> extgcd(T a, T b) {
     T u = 1, v = 0;
@@ -22,50 +26,24 @@ pair<T, T> extgcd(T a, T b) {
         swap(a, b);
         swap(u, v);
     }
-    assert(a > 0);
     return {a, u};
 }
 
+// a * x = c (mod b)
 template<typename T>
-bool diophantine(T a, T b, T c, T &x, T &y, T &g) {
-  if (a == 0 && b == 0) {
-    if (c == 0) {
-      x = y = g = 0;
-      return true;
+bool diophantine(T a, T b, T c, T &x, T &g) {
+    assert(a != 0 && b != 0);
+    auto res = extgcd(a, b);
+    g = res.first;
+    x = res.second;
+    if (c % g != 0) {
+        return false;
     }
-    return false;
-  }
-  if (a == 0) {
-    if (c % b == 0) {
-      x = 0;
-      y = c / b;
-      g = abs(b);
-      return true;
-    }
-    return false;
-  }
-  if (b == 0) {
-    if (c % a == 0) {
-      x = c / a;
-      y = 0;
-      g = abs(a);
-      return true;
-    }
-    return false;
-  }
-  g = extgcd(a, b, x, y);
-  if (c % g != 0) {
-    return false;
-  }
-  T dx = c / a;
-  c -= dx * a;
-  T dy = c / b;
-  c -= dy * b;
-  x = dx + (T) ((__int128) x * (c / g) % b);
-  y = dy + (T) ((__int128) y * (c / g) % a);
-  g = abs(g);
-  return true;
-  // |x|, |y| <= max(|a|, |b|, |c|) [tested]
+    T dx = c / a;
+    c -= dx * a;
+    x = ((dx + x * (c / g)) % (b / g));
+    g = abs(g);
+    return true;
 }
 
 int main() {
@@ -76,17 +54,35 @@ int main() {
     cin >> n >> m >> k;
     vector<long long> a(k);
     for (int i = 0; i < k; i++)
-        cin >> a[i];
-    
-    using i128 = __int128_t;
-    i128 M = 1;
-    for (long long x : a)
-        M = M * x / gcd(M, x);
-    
-    int A = 1, B = 0;
+      cin >> a[i];
+
+    long long A = 1, B = 0;
     for (int i = 0; i < k; i++) {
-        // A, B
-        // a[i], -i
+      // x = B (mod A)
+      // x = -i (mod a[i])
+      // A * X = -i - B (mod a[i])
+      long long x, g;
+      bool ok = diophantine(A, a[i], -i - B, x, g);
+      if (!ok || n / A < a[i] / g) {
+        cout << "NO\n";
+        return 0;
+      }
+      B += A * x; // abs(x) < a[i] / g  ==> abs(A * x) < lcm(A, a[i])
+      A *= a[i] / g;
+      B %= A;
     }
-    
+    if (B <= 0)
+      B += A;
+    if (B + k - 1 > m) {
+      cout << "NO\n";
+      return 0;
+    }
+    debug(A, B);
+    for (int i = 0; i < k; i++) {
+      if (gcd(A, B + i) != a[i]) {
+        cout << "NO\n";
+        return 0;
+      }
+    }
+    cout << "YES\n";
 }

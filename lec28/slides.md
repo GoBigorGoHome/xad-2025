@@ -3,10 +3,10 @@ marp: true
 math: mathjax
 paginate: true
 theme: lecture
-title: 数论
+title: 数论（一）
 ---
 
-# 数论
+# 数论（一）
 
 <div class=hidden>
 
@@ -190,6 +190,21 @@ int gcd(int a, int b) {
     return b == 0 ? a : gcd(a, a % b);
 }
 ```
+
+<div class=remark>
+
+`gcd(a, b)` 的返回值可能是负数，例如 `gcd(-2, 0)` 返回 $-2$。
+
+一般的，`gcd(a, b)` 的返回值是 $\pm \gcd(a, b)$。
+
+若要保证 `gcd(a, b)` 返回值非负，可改为
+```cpp
+int gcd(int a, int b) {
+    return b == 0 ? abs(a) : gcd(a, a % b);
+}
+```
+
+</div>
 
 ---
 
@@ -427,9 +442,10 @@ pair<int,int> extgcd(int a, int b) {
 }
 ```
 
-`extgcd(a, b)` 返回的两个整数依次是
-- $\gcd(a, b)$
-- 一个整数 $x$ 使得 $b$ 整除 $(\gcd(a, b) - ax)$
+`extgcd(a, b)` 返回的两个整数 $g$，$x$。
+- $g = \pm\gcd(a, b)$
+- $x$ 使得存在整数 $y$ 满足 $ax + by = g$。
+或者说 $x$ 使得 $b$ 整除 $g - ax$。
 
 ---
 
@@ -487,6 +503,8 @@ $$
 
 ---
 
+$$ x_{0} = y_1, \quad y_{0} = x_1 - y_1 q_1. $$
+
 ```cpp
 int extgcd(int a, int b, int& x, int& y) {
     if (b == 0) {
@@ -494,7 +512,7 @@ int extgcd(int a, int b, int& x, int& y) {
         y = 0;
         return a;
     }
-    int q = a % b;
+    int q = a / b;
     int g = extgcd(b, a - q * b, y, x);
     y -= x * q;
     return g;
@@ -610,16 +628,68 @@ $$ |x| \le {|b| \over 2g}, \quad |y| \le {|a| \over 2g}. $$
 1. 用扩展 gcd 算法算出 $\gcd(a, b)$ 和整数 $x_0, y_0$ 使得 $ax_0 + by_0 = \gcd(a, b)$。
 2. 如果 $\gcd(a, b) \mid c$，那么 $({c\over\gcd(a,b)} x_0, {c\over\gcd(a,b)} y_0)$ 就是 $ax + by = c$ 的一个解，否则方程无解。
 
+<div class=remark>
+
+当 $c$ 较大时，计算 ${c\over\gcd(a,b)}x_0$ 或 ${c\over\gcd(a,b)} y_0$ 可能溢出。
+
+</div>
+
+---
+
+<div class=question>
+
+求丢番图方程 $ax + by = c$ 的一组解 $(x, y)$ 使得 $|x|$ 和 $|y|$ 都不很大。
+
+</div>
+
+假设 $a \ne 0$ 且 $b \ne 0$。
+
+```cpp
+void diophantine(long long a, long long b, long long c, long long& x, long long& y) {
+    long long dx = c / a;
+    c -= dx * a;
+    long long dy = c / b;
+    c -= dy * b;
+    long long g = extgcd(a, b, x, y);
+    x = dx + x * (c / g) % b;
+    y = dy + y * (c / g) % a;
+}
+```
+
+---
+
+<div class=proposition>
+
+设 $a, b, c$ 是整数，$a \ne 0$，$b\ne 0$，$|c| < |a|$ 且 $|c| < |b|$。整数 $x, y$ 使得 $ax + by = c$。那么 `x / b + y / a == 0`。
+
+注意：`/` 是 C++ 的除法，向零取整。
+
+</div>
+
+---
+
+**证明**：设 $u$ = `x / b`，$r$ = `x % b`，$v$ = `y / a`，$s$ = `y % a`。我们要证明 $u + v = 0$.
+有 $x = ub + r$，$y = va + s$，$|r| < |b|$，$|s| < |a|$，$r = 0$ 或与 $x$ 同号，$s = 0$ 或与 $y$ 同号。
+
+若 $x = y = 0$，那么 $u = v = 0$。以下设 $x, y$ 不全为 $0$。首先证明 $ax$ 与 $by$ 不同号。若它们同号，则 $|c| = |ax + by| = |ax| + |by|$。因为 $x, y$ 不全是 $0$，右边至少是 $\min(|a|, |b|)$，但 $c < \min(|a|, |b|)$，矛盾。所以 $ax$ 与 $by$ 不同号。因此 $ar$ 与 $bs$ 也不可能同号，于是 $|ar + bs| \le \max(|ar|, |bs|)$。
+
+由 $|r| \le |b| - 1$ 得 $|ar| \le |a|(|b| - 1) = |ab| - |a|$。
+同理，$|bs| \le |b|(|a| - 1) = |ab| - |b|$。所以 $|ar + bs| \le |ab| - \min(|a|, |b|)$。
+又 $|c| < \min(|a|, |b|)$，所以 $|ar + bs| < |ab| - |c|$。
+
+另一方面，有 $c = ax + by = a(ub + r) + b(va + s) = ab(u + v) + ar + bs$.
+令 $k = u + v$，则 $ar + bs = c - abk$。若 $k \ne 0$，则
+$$|ar + bs| = |c - abk| \ge |abk| - |c| \ge |ab| - |c|.$$
+这与 $|ar + bs| < |ab| - |c|$ 矛盾。
+
+</div>
+
+
+
+
 ---
 
 
-在计算时需要注意
-- 当 $c$ 较大时，${c\over\gcd(a,b)}$ 乘 $x_0$ 可能溢出。
-
-我们可以这样做
-- 设 $q$ 和 $c'$ 分别是 $c$ 除以 $a$ 的商和余数。那么 $(q+{c'\over \gcd(a,b)}x_0, {c'\over\gcd(a,b)} y_0)$ 是 $ax + by = c$ 的一个解。
-
----
 
 
 # 同余式
@@ -673,64 +743,5 @@ $$
 - 方程组 $\begin{cases} x \equiv b_1 \pmod{a_1} \\ x \equiv b_2 \pmod{a_2} \end{cases}$ 等价于 $x \equiv b_1 + a_1X_0 \pmod{\lcm(a_1, a_2)}$。
 
 
----
-
-# 素数
-
-设 $p\in \Z\setminus \set{0, \pm 1}$。如果 $p$ 除了 $\pm 1$ 和 $\pm p$ 之外没有别的因数，则称 $p$ 是**素元**。正的素元称为**素数**。
-
----
-
-
-# 算术基本定理
-
-任何非零整数 $n$ 都有素因子分解
-$$
-n = \pm p_1^{a_1} \dots p_r^{a_r},
-$$
-其中 $r \in\Z_{\ge 0}$（当 $r = 0$ 时右式规定为 $1$），$p_1, \dots, p_r$ 是相异素数，$a_1,\dots, a_r\in \Z_{\ge 1}$，而且此分解不论顺序是唯一的。
-
-**证明** $\quad$ 关于分解的存在性，处理 $n \ge 1$ 的情形即可。我们寻求形如 $n = p_1^{a_1}\dots p_r^{a_r}$ 的分解。如果 $n$ 既非 $1$ 又非素数，则分解为 $n = ab$，其中 $1< a, b < n$。继续对 $a, b$ 递归地操作，最终可表 $n$ 为若干个素数的乘积，容许重复。
-
----
-
-唯一性仍可简化到 $n \ge 1$ 的情形。设 $p_1^{a_1}\dots p_r^{a_r} = q_1^{b_1}\dots q_s^{b_s}$，其中 $p_1, \dots, p_r$ 是相异素数，$q_1, \dots, q_s$ 也是相异素数，而 $a_i, b_j \in\Z_{\ge 1}$。注意到 $r = 0$ 当且仅当 $s = 0$，此时两边都是 $1$。故以下不妨设 $r, s \ge 1$。
-
-由于 $p_1 \mid q_1^{b_1} \dots q_s^{b_s}$，反复应用欧几里得引理可知存在 $1\le j \le s$ 使得 $p_1 \mid q_j$；这进一步蕴含 $p_1 = q_j$。重排下标后不妨假设 $p_1 = q_1$，必要时等号两边互换，不妨假设 $a_1 \le b_1$。于是
-$$
-p_2^{a_2} \dots p_r^{a_r} = p_1^{b_1-a_1} q_2^{b_2}\dots q_s^{b_s}
-$$
-再次应用欧几里得引理可见 $p_1$ 不整除左式，故 $b_1 = a_1$。按此递归地论证，即得分解的唯一性。
-
----
-
-# 算术基本定理的推论
-
-- 对于任何素数 $p$ 和非零整数 $n$，我们有 $p\mid n$ 当且仅当 $p$ 在 $n$ 的素因子分解中出现，相应的指数 $a\in\Z_{\ge 1}$ 由以下性质唯一确定：$p^{a} \mid n$ 而 $p^{a+1}\not\mid n$，数论中的标准记法如下
-    - 设 $p$ 为素数，我们以符号 $p^a \Div n$ 表达 $p^a \mid n$ 而 $p^{a+1} \not\mid n$。
-
-- 考虑正整数 $n = \prod_{i=1}^{r} p_i^{a_i}$ 和 $m = \prod_{i=1}^{r} p_i^{b_i}$，其中 $p_1, \dots, p_r$ 是相异素数而 $a_i, b_i \in \Z_{\ge 0}$，则
-
-    - $m \mid n \iff \forall i\in\set{1, \dots, r},\ b_i \le a_i.$
-
-    - $\gcd(n, m) = \prod_{i=1}^{r} p_i^{\min\set{a_i, b_i}}, \qquad \lcm(n, m) = \prod_{i=1}^{r} p_i^{\max\set{a_i, b_i}}.$
-    
-        对于任意多个正整数的 $\gcd$ 和 $\lcm$ 也有类似结果。
-
----
-
-# 有无穷多个素数
-
-素数列 $2, 3, 5, 7, 11, \ldots$ 是数论关切的基本对象；这方面最古老也是最基础的结果是
-
-<div class=proposition>
-
-存在无穷多个素数。
-
-</div>
-
-**证明** $\quad$ 对任意一列素数 $p_1 < \cdots < p_n$，考虑
-$$m := p_1 \cdots p_n + 1,$$
-则 $m > 1$，而且它不被 $p_1,\dots, p_n$ 中任一个素数整除。因此 $m$ 的素因子分解中必有不同于 $p_1, \dots, p_n$ 的素数。
 
 
