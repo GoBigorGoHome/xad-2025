@@ -314,16 +314,6 @@ img[alt~="center"] {
   border-radius: 6px 0 8px 0;
 }
 
-.remark::after {
-  content: "🧐";
-  position: absolute;
-  top: 10px;
-  left: 55px;
-  color: #795548;
-  font-weight: bold;
-  font-size: 0.95em;
-}
-
 .algorithm {
     background-color: rgb(232, 245, 233);
     position: relative;

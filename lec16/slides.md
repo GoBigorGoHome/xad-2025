@@ -13,6 +13,7 @@ $\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}$
 $\DeclareMathOperator{\bit}{bit}$
 $\newcommand{\bitand}{\mathbin{\&}}$
 $\newcommand{\bitor}{\mathbin{\mathrm{or}}}$
+$\newcommand{\Z}{\mathbb{Z}}$
 
 ---
 
@@ -749,6 +750,17 @@ $$
 \floor{n/(k+1)} = k \implies n/(k+1) \ge k \implies n/k \ge k+1 \implies \floor{n/k} \ge k+1.
 $$
 所以 $\floor{n/k}$ 和 $\floor{n/(k+1)}$ 都等于 $k$ 是不可能的。
+
+</div>
+
+---
+
+<div class=proposition>
+
+设 $n$ 是正整数，那么集合 $\set{\floor{n/i} : i \in \Z, 1 \le i \le n}$ 有 $\floor*{n/(\floor{\sqrt{n}} + 1)} + \floor{\sqrt{n}}$ 个元素，从小到大列出来，是
+$$
+1, 2, 3, \dots, \floor*{n/(\floor*{\sqrt{n}} + 1)}, \floor*{n/\floor*{\sqrt{n}}}, \floor*{n/(\floor*{\sqrt{n}} - 1)}, \dots, \floor{n/1}
+$$
 
 </div>
 

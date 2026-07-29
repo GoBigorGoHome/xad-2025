@@ -328,7 +328,7 @@ void get_size(int u, int p) {
     sz[u] = 1;
     for (int v : g[u])
         if (v != p) {
-            dfs(v, u);
+            get_size(v, u);
             sz[u] += sz[v];
         }
 }
@@ -348,7 +348,7 @@ int centroid(int u, int p) {
 
 洛谷[P5666](https://www.luogu.com.cn/problem/P5666)
 
-给你一个有 $n$ 个点树。点从 $1$ 到 $n$ 编号。
+给你一个有 $n$ 个点的树。点从 $1$ 到 $n$ 编号。
 删除一条边后，分裂成两个子树。这样的树有 $2(n-1)$ 个。
 求这些树的重心的编号之和。若一个树有两个重心，两个都算。
 
