@@ -15,8 +15,7 @@ $\newcommand{\R}{\mathbb{R}}$
 $\DeclareMathOperator{\lcm}{lcm}$
 $\DeclareMathOperator{\extgcd}{extgcd}$
 $\newcommand{\Div}{\mathrel{\Vert}}$
-$\DeclarePairedDelimiter\ceil{\lceil}{\rceil}$
-$\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}$
+$\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}$
 $\renewcommand{\%}{\mathbin{\text{\%}}}$
 
 </div>
@@ -54,18 +53,55 @@ $$
 
 # 算术基本定理的推论
 
-- 对于任何素数 $p$ 和非零整数 $n$，我们有 $p\mid n$ 当且仅当 $p$ 在 $n$ 的素因子分解中出现，相应的指数 $a\in\Z_{\ge 1}$ 由以下性质唯一确定：$p^{a} \mid n$ 而 $p^{a+1}\not\mid n$，数论中的标准记法如下
-    - 设 $p$ 为素数，我们以符号 $p^a \Div n$ 表达 $p^a \mid n$ 而 $p^{a+1} \not\mid n$。
-
-- 考虑正整数 $n = \prod_{i=1}^{r} p_i^{a_i}$ 和 $m = \prod_{i=1}^{r} p_i^{b_i}$，其中 $p_1, \dots, p_r$ 是相异素数而 $a_i, b_i \in \Z_{\ge 0}$，则
-
-    - $m \mid n \iff \forall i\in\set{1, \dots, r},\ b_i \le a_i.$
-
-    - $\gcd(n, m) = \prod_{i=1}^{r} p_i^{\min\set{a_i, b_i}}, \qquad \lcm(n, m) = \prod_{i=1}^{r} p_i^{\max\set{a_i, b_i}}.$
-    
-        对于任意多个正整数的 $\gcd$ 和 $\lcm$ 也有类似结果。
+对于任何素数 $p$ 和非零整数 $n$，我们有 $p\mid n$ 当且仅当 $p$ 在 $n$ 的素因子分解中出现，相应的指数 $a\in\Z_{\ge 1}$ 由以下性质唯一确定：$p^{a} \mid n$ 而 $p^{a+1}\not\mid n$，数论中的标准记法如下
+- 设 $p$ 为素数，我们以符号 $p^a \Div n$ 表达 $p^a \mid n$ 而 $p^{a+1} \not\mid n$。
 
 ---
+
+考虑正整数 $n = \prod_{i=1}^{r} p_i^{a_i}$ 和 $m = \prod_{i=1}^{r} p_i^{b_i}$，其中 $p_1, \dots, p_r$ 是相异素数而 $a_i, b_i \in \Z_{\ge 0}$，则
+
+- $m \mid n \iff \forall i\in\set{1, \dots, r},\ b_i \le a_i.$
+
+- $\gcd(n, m) = \prod_{i=1}^{r} p_i^{\min\set{a_i, b_i}}, \qquad \lcm(n, m) = \prod_{i=1}^{r} p_i^{\max\set{a_i, b_i}}.$
+
+    对于任意多个正整数的 $\gcd$ 和 $\lcm$ 也有类似结果。
+
+---
+
+定义 $d(n)$ 为正整数 $n$ 的正因数的个数。例如 $d(1) = 1$，$d(2) = 2$，$d(12) = 6$。
+
+<div class=corollary>
+
+设正整数 $n$ 的素因子分解是 $n = p_1^{a_1} \dots p_r^{a_r}$，那么 $d(n) = (a_1 + 1) \dots (a_r + 1)$。
+
+</div>
+
+---
+
+# 例题：Product of Divisors
+
+$A^B$ 的全部正因数的乘积能被 $A$ 整除多少次？
+
+- $2 \le A \le 10^{12}$
+- $0 \le B \le 10^{18}$
+
+
+---
+
+<div class=proposition>
+
+$n$ 的正因数的乘积等于 $\sqrt{n}^{d(n)}$。
+
+</div>
+
+<div class=proof>
+
+若 $x$ 是 $n$ 的因数且 $x \ne \sqrt{n}$，那么 $n/x$ 也是 $n$ 的因数。
+
+</div>
+
+---
+
 
 # 有无穷多个素数
 
@@ -106,7 +142,29 @@ $$m := p_1 \cdots p_n + 1,$$
 
 # 埃氏筛
 
+```cpp
+vector<int> get_primes(int n) {
+    vector<int> primes;
+    vector<bool> is_prime(n + 1, true);
+    for (int i = 2; i <= n; i++)
+        if (is_prime[i]) {
+            primes.push_back(i);
+            for (int j = 2 * i; j <= n; j += i)
+                is_prime[j] = false;
+        }
+    return primes;
+}
+```
+
+时间复杂度：$O(n\log\log n)$。
+
 ---
+
+# 埃氏筛的时间复杂度
+
+
+---
+
 
 # 线性筛
 
@@ -196,7 +254,7 @@ $$ br_2 + r_1 \le b(c-1) + (b-1) = bc - 1 < bc.  $$
 ---
 
 ## 计算 $F(N, s)$
-
+ 
 <div class=question>
 
 给定正整数 $N$。令 $s = \pi(\sqrt{N})$。根据递推式
@@ -229,7 +287,6 @@ $$
 $$
 Q_n := \set{\lfloor n/x \rfloor : x\in\Z, 1 \le x \le n}.
 $$
-
 </div>
 
 例如
@@ -374,7 +431,7 @@ long long prime_count(long long n) {
 <div class=proposition>
 
 设 $n$ 是正整数。对于任意正整数 $t$，定义 $g_n(t)$ 为 $Q_n$ 中大于等于 $t$ 的元素的个数，那么
-  $$
+$$
   g_n(t) = \begin{cases}
   k +  \floor{n/(k+1)} - t + 1, & \quad t \le k, \\
   \floor{n/t}, & \quad t \ge k + 1.
