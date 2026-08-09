@@ -387,35 +387,35 @@ $$1, 2, \dots, k-1, k, \floor{n/k}, \floor{n/(k-1)}, \dots,  \floor{n/2}, \floor
 ```cpp
 long long prime_count(long long n) {
     const int k = (int) sqrt(n);
-    vector<long long> v; // n, n/2, n/3, ..., n
+    vector<long long> v(k + 1);
     for (int i = 1; i <= k; i++)
-        v.push_back(n / i);
+        v[i] = n / i;
     for (int i = n / (k + 1); i >= 1; i--)
         v.push_back(i);
     // 对于 i = 1, 2, ..., k+1 有 n/i == v[i-1]。
     // 对于 i = 1, 2, ..., k 还有，i 是唯一的满足 n/d == n/i 的正整数 d。我们称这些值为大值。
     const int m = (int) v.size();
     vector<long long> f(m);
-    for (int i = 0; i < m; i++)
+    for (int i = 1; i < m; i++)
         f[i] = v[i] - 1;
     
     auto [p, lpf] = get_primes(k);
     const int s = (int) p.size();
     for (int i = 0; i < s; i++) {
-        f[0] -= f[p[i] - 1] - i;
+        f[1] -= f[p[i]] - i;
         if (i == s - 1) break;
         const long long L = (long long) p[i] * p[i];
         const int lim = k / p[i];
-        for (int j = p[i + 1] - 1; j < m && v[j] >= L; j++) {
+        for (int j = p[i + 1]; j < m && v[j] >= L; j++) {
             if (j < k && lpf[j + 1] < p[i + 1]) continue;
-            if (j + 1 <= lim) {
-                f[j] -= f[(j + 1) * p[i] - 1] - i;
+            if (j <= lim) {
+                f[j] -= f[j * p[i]] - i;
             } else { // v[j] / p[i] <= k
                 f[j] -= f[m - v[j] / p[i]] - i;
             }
         }
     }
-    return f[0];
+    return f[1];
 }
 ```
 
