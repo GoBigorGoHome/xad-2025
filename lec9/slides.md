@@ -214,7 +214,7 @@ Robert Tarjan
 
 <div class=topic-box>
 
-只使用路径压缩，最坏情况下运行时间是 $O(n + f\cdot (1 + \log_{2 + m/n} n))$。
+只使用路径压缩，最坏情况下运行时间是 $O(n + m\cdot (1 + \log_{2 + m/n} n))$。
 </div>
 
 - 通常足够快。
