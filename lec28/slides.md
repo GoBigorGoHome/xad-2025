@@ -187,7 +187,7 @@ $$
 
 ```cpp
 int gcd(int a, int b) {
-    return b == 0 ? a : gcd(a, a % b);
+    return b == 0 ? a : gcd(b, a % b);
 }
 ```
 
@@ -200,7 +200,7 @@ int gcd(int a, int b) {
 若要保证 `gcd(a, b)` 返回值非负，可改为
 ```cpp
 int gcd(int a, int b) {
-    return b == 0 ? abs(a) : gcd(a, a % b);
+    return b == 0 ? abs(a) : gcd(b, a % b);
 }
 ```
 
