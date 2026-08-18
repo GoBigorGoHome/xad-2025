@@ -432,7 +432,7 @@ $$
 pair<int,int> extgcd(int a, int b) {
     int u = 1, v = 0;
     while (b != 0) {
-        int q = a % b;
+        int q = a / b;
         a -= q * b;
         u -= q * v;
         swap(a, b);
